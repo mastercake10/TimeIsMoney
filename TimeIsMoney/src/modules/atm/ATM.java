@@ -59,6 +59,7 @@ public class ATM implements Listener {
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onClick(InventoryClickEvent e){
+<<<<<<< HEAD
 		
 		try{
 			if(e == null) return;
@@ -107,6 +108,50 @@ public class ATM implements Listener {
 			}
 		}catch(Exception e2){
 			
+=======
+		if(e.getClickedInventory() == null) return;
+		if(e.getClickedInventory().getTitle() == null) return;
+		if(e.getClickedInventory().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
+			e.setCancelled(true);
+			String bank = e.getWhoClicked().getName() + "_TimBANK";
+			if(e.getCurrentItem() != null){
+				if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_withdraw").replace('&', '§'))){
+
+					double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
+					
+					if(!Main.economy.hasAccount(bank)){
+						Main.economy.createPlayerAccount(bank);
+					}
+					if(Main.economy.has(bank, amount)){
+						Main.economy.withdrawPlayer(bank, amount);
+						Main.economy.depositPlayer((Player) e.getWhoClicked(), amount);
+						e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " " + Main.economy.format(amount));
+					}else{
+						e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoneyinbank").replace('&', '§'));
+					}
+				}else
+				if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_deposit").replace('&', '§'))){
+					
+					double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
+					
+					if(Main.economy.has((Player) e.getWhoClicked(), amount)){
+						if(!Main.economy.hasAccount(bank)){
+							Main.economy.createPlayerAccount(bank);
+						}
+						Main.economy.depositPlayer(bank, amount);
+						Main.economy.withdrawPlayer((Player) e.getWhoClicked(), amount);
+						e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " " + Main.economy.format(amount));
+					}else{
+						e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoney").replace('&', '§'));
+					}
+				}
+				ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
+				ItemMeta im = is.getItemMeta();
+				im.setDisplayName("§cBank balance: " + getBankbalance(e.getWhoClicked().getName() + "_TimBANK"));
+				is.setItemMeta(im);
+				e.getInventory().setItem(4, is);
+			}
+>>>>>>> branch 'master' of https://github.com/mastercake10/TimeIsMoney.git
 		}
 	}
 	public double getBankbalance(String name){
