@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-<<<<<<< HEAD
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
