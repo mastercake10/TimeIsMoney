@@ -1,29 +1,6 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="/home/linus/api/Essentials-2.x-SNAPSHOT(2).jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/spigot.jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/spigot1.8.3.jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/spigot-1.8.4-R0.1-SNAPSHOT-latest.jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/spigot-1.8-R0.1-SNAPSHOT-b1658.jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/spigot_server1.9.jar"/>
-	<classpathentry kind="lib" path="/home/linus/api/Vault 1.8.1.jar"/>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="lib" path="/home/linus/api/spigot-patched.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="C:/Users/Bukkit/spigot1.8.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bukkit/Vault 1.8.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bukkit/spigot-api-1.8.4-R0.1-SNAPSHOT-latest.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bukkit/spigot-1.8-R0.1-SNAPSHOT-b1658.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Linus/Desktop/Bukkit-1.8/spigot.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Linus/Desktop/Dev-Server/Avendria/Server/hub/plugins/Essentials.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Bukkit/spigot_server1.9.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
->>>>>>> branch 'master' of https://github.com/mastercake10/TimeIsMoney.git
