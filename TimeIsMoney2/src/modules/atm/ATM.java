@@ -229,12 +229,11 @@ public class ATM implements Listener {
 			e.setResult(Result.DENY);
 		}
 	}
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onSign(final SignChangeEvent e){
 		final Block b = e.getBlock();
 		if(b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST){
-			pl.getServer().getScheduler().scheduleAsyncDelayedTask(pl, new Runnable(){
+			pl.getServer().getScheduler().scheduleSyncDelayedTask(pl, new Runnable(){
 				public void run(){
 					if(b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST){
 						Sign sign = (Sign) e.getBlock().getState();
