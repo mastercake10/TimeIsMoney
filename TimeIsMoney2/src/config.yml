@@ -35,4 +35,5 @@ atm_withdraw: "&cWithdraw"
 atm_deposit: "&cDeposit"
 atm_balance: "&cBank balance:"
 auto-update: true
+debug-log: false
 configuration-version: 12

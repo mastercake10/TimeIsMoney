@@ -25,7 +25,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 import modules.atm.ATM;
 import net.milkbowl.vault.economy.Economy;
 import webapi.VersionChecker;
@@ -338,6 +337,9 @@ public class Main extends JavaPlugin{
 	}
 	@SuppressWarnings("deprecation")
 	public void log(String msg){
+		if(!this.getConfig().getBoolean("debug-log")){
+			return;	
+		}
 		Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
 
 		File file = new File("plugins/TimeIsMoney/log.txt");
