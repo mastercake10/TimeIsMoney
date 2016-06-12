@@ -45,7 +45,7 @@ public class Main extends JavaPlugin{
 	ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	
 	public static int cfg_version = 12;
-	public static int pl_version = 1925;
+	public static int pl_version = 1926;
 	//1925 19.05.16
 	int currentDay = 0;
 	

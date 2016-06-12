@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="/home/linus/api/spigot_server1.9.jar"/>
 	<classpathentry kind="lib" path="/home/linus/api/Vault 1.8.1.jar"/>
 	<classpathentry kind="lib" path="/home/linus/api/spigot-1.9.2.jar"/>
+	<classpathentry kind="lib" path="/home/linus/api/spigot-1.10.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
