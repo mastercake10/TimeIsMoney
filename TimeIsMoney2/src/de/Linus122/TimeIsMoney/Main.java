@@ -45,8 +45,8 @@ public class Main extends JavaPlugin{
 	ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	
 	public static int cfg_version = 12;
-	public static int pl_version = 1926;
-	//1925 19.05.16
+	public static int pl_version = 1928;
+
 	int currentDay = 0;
 	
 	public static YamlConfiguration finalconfig;
@@ -60,7 +60,7 @@ public class Main extends JavaPlugin{
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		
 		currentDay = (new Date()).getDay();
-		
+	
 		File config = new File("plugins/TimeIsMoney/config.yml");
 		if(config.exists()){
 			YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);	
