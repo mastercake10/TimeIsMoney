@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -26,15 +30,28 @@ import org.bukkit.plugin.Plugin;
 import de.Linus122.TimeIsMoney.Main;
 import net.milkbowl.vault.economy.EconomyResponse;
 
-public class ATM implements Listener {
+public class ATM implements Listener, CommandExecutor {
 	Plugin pl;
 	
-	public ATM(Plugin pl){
+	public ATM(Main pl){
 		this.pl = pl;
 		pl.getServer().getPluginManager().registerEvents(this, pl);
-		
+		pl.getCommand("atm").setExecutor(this);
 	}
 	
+	public static String getBank(Player p){
+		if(!Main.finalconfig.getBoolean("group-atms")){
+			return p.getName() + "_TimBANK";
+		}else{
+			for(String key : Main.finalconfig.getConfigurationSection("atm_groups").getKeys(false)){
+				List<String> list = Main.finalconfig.getStringList("atm_groups." + key);
+				if(list.contains(p.getWorld().getName())){
+					return p.getName() + "_TimBANK_" + key;
+				}
+			}
+		}
+		return p.getName() + "_TimBANK";
+	}
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent e){
 		if(e.getClickedBlock() != null){
@@ -68,7 +85,7 @@ public class ATM implements Listener {
 			if(e.getInventory().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
 				e.setResult(Result.DENY);
 				//e.setCancelled(true);
-				String bank = e.getWhoClicked().getName() + "_TimBANK";
+				String bank = getBank((Player)e.getWhoClicked());
 				if(e.getCurrentItem() != null){
 					if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_withdraw").replace('&', '§'))){
 	
@@ -116,12 +133,14 @@ public class ATM implements Listener {
 			return Main.economy.getBalance(name);
 	}
 	private void openGUI(Player player) {
+		String bank = getBank(player);
+		
 		Inventory atm_gui = Bukkit.createInventory(null, 9, "§cATM");
 		
 		//
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(getBankbalance(player.getName() + "_TimBANK")));
+		im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(getBankbalance(bank)));
 		is.setItemMeta(im);
 		atm_gui.setItem(4, is);
 		
@@ -252,5 +271,27 @@ public class ATM implements Listener {
 				}
 			}, 10L);
 		}
+	}
+
+	@Override
+	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] args) {
+		if(cs.hasPermission("tim.admin")){
+			if(args.length > 0){
+				@SuppressWarnings("deprecation")
+				OfflinePlayer op = Bukkit.getOfflinePlayer(args[0]);
+				if(op == null){
+					cs.sendMessage("Player is offline");
+					return true;
+				}
+				if(op.isOnline()){
+					openGUI(op.getPlayer());
+					cs.sendMessage("opened!");
+				}
+			}else{
+				cs.sendMessage("/atm <player>");
+				return true;
+			}
+		}
+		return true;
 	}
 }

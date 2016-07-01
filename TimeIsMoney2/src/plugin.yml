@@ -11,3 +11,7 @@ commands:
       aliases: tim
       usage: /<command>
       permission: tim.reload
+   atm:
+      description: Opens the atm for other player
+      usage: /<command>
+      permission: tim.admin
