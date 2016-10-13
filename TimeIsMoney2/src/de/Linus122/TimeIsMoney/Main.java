@@ -8,21 +8,31 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import modules.atm.ATM;
@@ -45,7 +55,7 @@ public class Main extends JavaPlugin{
 	ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	
 	public static int cfg_version = 12;
-	public static int pl_version = 1930;
+	public static int pl_version = 1937;
 
 	int currentDay = 0;
 	
@@ -110,7 +120,7 @@ public class Main extends JavaPlugin{
 					currentDay = new Date().getDay();
 				}
 			}
-		}, 20L * 60, 20L * 60);
+		}, 20L * 60, 20L * 60 * 15);
 		setupEconomy();
 		
 		message = finalconfig.getString("message");
@@ -127,29 +137,35 @@ public class Main extends JavaPlugin{
 		}
 		
 		loadPayouts();
-		try{
-			VersionChecker.init();
-			if(Main.pl_version < VersionChecker.getVersion()){
-				if(this.getConfig().getBoolean("auto-update")){
-					clogger.sendMessage("[TimeIsMoney] §cYou are using an old version, I will update this plugin for you.");
-					//Update
-					URL loc = Bukkit.getPluginManager().getPlugin("TimeIsMoney").getClass().getProtectionDomain().getCodeSource().getLocation();
-					String url = VersionChecker.getNewVersionFileUrl();
-					Bukkit.getUpdateFolderFile().mkdir();
-					File file = new File(Bukkit.getUpdateFolderFile().getPath() + "/" + loc.getFile().split("/")[loc.getFile().split("/").length - 1]);
-					
-					VersionChecker.download(url,file);
-					clogger.sendMessage("[TimeIsMoney] §aSuccess! Downloaded v" + VersionChecker.getVersion());
-					Bukkit.reload();
-					return;
-				}else{
-					clogger.sendMessage("[TimeIsMoney] §cYou are using an old version, please update at");
-					clogger.sendMessage("§chttps://www.spigotmc.org/resources/time-is-money.12409/");
+		if(this.getConfig().getBoolean("auto-update")){
+
+			Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable(){
+				public void run(){
+					if(Main.pl_version < VersionChecker.getVersion()){
+						clogger.sendMessage("[TimeIsMoney] §cYou are using an old version, I will update this plugin for you.");
+						//Update
+						URL loc = Bukkit.getPluginManager().getPlugin("TimeIsMoney").getClass().getProtectionDomain().getCodeSource().getLocation();
+						Bukkit.getUpdateFolderFile().mkdir();
+						File file = new File(Bukkit.getUpdateFolderFile().getPath() + "/" + loc.getFile().split("/")[loc.getFile().split("/").length - 1]);
+						
+						try {
+							VersionChecker.download(file);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						clogger.sendMessage("[TimeIsMoney] §aSuccess! Downloaded v" + VersionChecker.getVersion());
+						try {
+							reloadPlugin("TimeIsMoney");
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
-			}
-		}catch(Exception e){
-			
+			},0L, 20L * 60 * 20);
 		}
+		
 		
 		 String packageName = this.getServer().getClass().getPackage().getName();
         // Get full package string of CraftServer.
@@ -252,6 +268,8 @@ public class Main extends JavaPlugin{
     }
 	@SuppressWarnings("deprecation")
 	public void pay(Player p){
+		if(p == null) return;
+		
 		//REACHED MAX PAYOUT CHECK
 		double payed = 0;
 		if(payedMoney.containsKey(p.getName())){
@@ -272,7 +290,7 @@ public class Main extends JavaPlugin{
 		}
 		
 		//AFK CHECK
-		if(!finalconfig.getBoolean("afk_payout")){
+		if(!finalconfig.getBoolean("afk_payout") && !p.hasPermission("tim.afkbypass")){
 			//ESENTIALS_AFK_FEATURE
 			if(Bukkit.getServer().getPluginManager().isPluginEnabled("Essentials")){
 				com.earth2me.essentials.Essentials essentials = (com.earth2me.essentials.Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
@@ -310,7 +328,11 @@ public class Main extends JavaPlugin{
 			}
 			Main.economy.depositPlayer(bank, payout.payout_amount);
 		}else{
-			double before = economy.getBalance(p);
+			double before = 0;
+			if(economy.hasAccount(p)){
+				before = economy.getBalance(p);
+			}
+		
 			economy.depositPlayer(p, payout.payout_amount);
 			log(p.getName() + ": Deposited: " + payout.payout_amount + " Balance-before: " + before + " Balance-now: " + economy.getBalance(p));
 			
@@ -385,4 +407,110 @@ public class Main extends JavaPlugin{
 			}
 		}
 	}
+	private boolean unloadPlugin(String pluginName)
+		    throws Exception
+		  {
+		    PluginManager manager = getServer().getPluginManager();
+		    SimplePluginManager spmanager = (SimplePluginManager)manager;
+		    if (spmanager != null)
+		    {
+		      Field pluginsField = spmanager.getClass().getDeclaredField("plugins");
+		      pluginsField.setAccessible(true);
+		      List<Plugin> plugins = (List)pluginsField.get(spmanager);
+		      
+		      Field lookupNamesField = spmanager.getClass().getDeclaredField("lookupNames");
+		      lookupNamesField.setAccessible(true);
+		      Map<String, Plugin> lookupNames = (Map)lookupNamesField.get(spmanager);
+		      
+		      Field commandMapField = spmanager.getClass().getDeclaredField("commandMap");
+		      commandMapField.setAccessible(true);
+		      SimpleCommandMap commandMap = (SimpleCommandMap)commandMapField.get(spmanager);
+		      
+		      Field knownCommandsField = null;
+		      Map<String, Command> knownCommands = null;
+		      if (commandMap != null)
+		      {
+		        knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+		        knownCommandsField.setAccessible(true);
+		        knownCommands = (Map)knownCommandsField.get(commandMap);
+		      }
+		      Plugin plugin;
+		      Iterator<Map.Entry<String, Command>> it;
+		      for (Plugin plugin1 : manager.getPlugins()) {
+		        if (plugin1.getDescription().getName().equalsIgnoreCase(pluginName))
+		        {
+		          manager.disablePlugin(plugin1);
+		          if ((plugins != null) && (plugins.contains(plugin1))) {
+		            plugins.remove(plugin1);
+		          }
+		          if ((lookupNames != null) && (lookupNames.containsKey(pluginName))) {
+		            lookupNames.remove(pluginName);
+		          }
+		          if (commandMap != null) {
+		            for (it = knownCommands.entrySet().iterator(); it.hasNext();)
+		            {
+		              Map.Entry<String, Command> entry = (Map.Entry)it.next();
+		              if ((entry.getValue() instanceof PluginCommand))
+		              {
+		                PluginCommand command = (PluginCommand)entry.getValue();
+		                if (command.getPlugin() == plugin1)
+		                {
+		                  command.unregister(commandMap);
+		                  it.remove();
+		                }
+		              }
+		            }
+		          }
+		        }
+		      }
+		    }
+		    else
+		    {
+
+		      return true;
+		    }
+
+
+		    return true;
+		  }
+		  
+		  private boolean loadPlugin(String pluginName)
+		  {
+		    try
+		    {
+		      PluginManager manager = getServer().getPluginManager();
+		      Plugin plugin = manager.loadPlugin(new File("plugins", pluginName + ".jar"));
+		      if (plugin == null)
+		      {
+		        return false;
+		      }
+		      plugin.onLoad();
+		      manager.enablePlugin(plugin);
+		    }
+		    catch (Exception e)
+		    {
+
+		      return false;
+		    }
+
+		    return true;
+		  }
+		  
+		  private boolean reloadPlugin(String pluginName)
+		    throws Exception
+		  {
+		    boolean unload = unloadPlugin(pluginName);
+		    boolean load = loadPlugin(pluginName);
+
+		    if ((unload) && (load))
+		    {
+
+		    }
+		    else
+		    {
+
+		      return false;
+		    }
+		    return true;
+		  }
 }

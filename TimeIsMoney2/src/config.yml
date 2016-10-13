@@ -3,6 +3,8 @@ configuration-version: 12
 auto-update: true
 debug-log: false
 
+# You can define if the player gets a payout whether player is afk or not.
+# the permission tim.afkbypass would avoid this for certain user or groups.
 afk_payout: false
 display-messages-in-chat: true
 display-messages-in-actionbar: true

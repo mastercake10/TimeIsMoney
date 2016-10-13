@@ -8,39 +8,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import de.Linus122.TimeIsMoney.Main;
+
 
 public class VersionChecker {
-	public static String url = "https://www.spigotmc.org/resources/time-is-money.12409/";
-	public static String content = "";
+	public static String url_check_version = "http://avendria.de/tim/checkversion.php?version=";
+	public static String url_download = "http://avendria.de/tim/download.php";
 	
 	public static int getVersion(){
-		int version2 = 10;
-		try{
-	        String s = content.split("<div class=\"section\" id=\"versionInfo\">")[1].split("</div>")[0];
-	        String version = s.split("<h3>Version ")[1].split("</h3>")[0].replace(".", "");
-	        version2 = Integer.valueOf(version);
-		}catch(Exception e){
+
+		try {
+			URLConnection con = new URL(url_check_version + Main.pl_version).openConnection();
+			con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+
+			return Integer.parseInt(get_content(con));
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-        return version2;
+		return 0;
+
 	}
-	public static String getNewVersionFileUrl(){
-		String s = content.split("<label class=\"downloadButton \">")[1].split("</label>")[0];
-		String link = s.split("<a href=\"")[1].split("\" class=\"inner\">")[0];
-		String link2 = "https://www.spigotmc.org/" + link;
-		return link2;
-	}
-	
-	public static void init() throws MalformedURLException, IOException {
-		HttpsURLConnection con = (HttpsURLConnection) new URL(url).openConnection();
-		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-		content = get_content(con);
-	}
-	public static void download(String url2, File location) throws IOException{
-		HttpsURLConnection con = (HttpsURLConnection) new URL(url2).openConnection();
+	public static void download(File location) throws IOException{
+		URLConnection con =  new URL(url_download).openConnection();
 		con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 		InputStream in = con.getInputStream();
 		FileOutputStream fos = new FileOutputStream(location);
@@ -56,7 +51,7 @@ public class VersionChecker {
 		fos.flush();
 		fos.close();
 	}
-    public static String get_content(HttpsURLConnection con){
+    public static String get_content(URLConnection con){
 		String content = "";
 		if(con!=null){
 				
