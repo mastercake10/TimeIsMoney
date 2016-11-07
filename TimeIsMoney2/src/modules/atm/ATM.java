@@ -1,5 +1,7 @@
 package modules.atm;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +13,12 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -28,18 +30,74 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import de.Linus122.TimeIsMoney.Main;
-import net.milkbowl.vault.economy.EconomyResponse;
 
 public class ATM implements Listener, CommandExecutor {
 	Plugin pl;
+	
+	public static YamlConfiguration cfg;
+	public static File fileBankAccounts = new File("plugins/TimeIsMoney/data.dat");
 	
 	public ATM(Main pl){
 		this.pl = pl;
 		pl.getServer().getPluginManager().registerEvents(this, pl);
 		pl.getCommand("atm").setExecutor(this);
+		if(!fileBankAccounts.exists()){
+			try {
+				fileBankAccounts.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+		cfg = YamlConfiguration.loadConfiguration(fileBankAccounts);
 	}
-	
-	public static String getBank(Player p){
+	public static void withdrawBank(Player p, double amount){
+		String bankString = getBankString(p);
+		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
+		cfg.set(bankString, getBankBalance(p) - amount);
+		saveBanks();
+	}
+	public static void depositBank(Player p, double amount){
+		String bankString = getBankString(p);
+		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
+		cfg.set(bankString, getBankBalance(p) + amount);
+		saveBanks();
+	}
+	public static boolean bankHas(Player p, double amount){
+		String bankString = getBankString(p);
+		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
+		if(getBankBalance(p) >= amount){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+	public static double getBankBalance(Player p){
+		String bankString = getBankString(p);
+		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
+		return cfg.getDouble(bankString);
+	}
+	public static void saveBanks(){
+		try {
+			cfg.save(fileBankAccounts);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	//Converts old tim bank
+	public static void convertOldBank(Player p){
+		String bankString = getBankString(p);
+		if(Main.economy.hasAccount(bankString)){
+			if(Main.economy.getBalance(bankString) > 0){
+				p.sendMessage("§aSuccessfully converted your old TIM-Bank to new version!");
+				depositBank(p, Main.economy.getBalance(bankString));
+				Main.economy.withdrawPlayer(bankString, Main.economy.getBalance(bankString));	
+			}
+		}
+	}
+	private static String getBankString(Player p){
 		if(!Main.finalconfig.getBoolean("group-atms")){
 			return p.getName() + "_TimBANK";
 		}else{
@@ -51,6 +109,17 @@ public class ATM implements Listener, CommandExecutor {
 			}
 		}
 		return p.getName() + "_TimBANK";
+		/*if(!Main.finalconfig.getBoolean("group-atms")){
+			return p.getName() + "_TimBANK";
+		}else{
+			for(String key : Main.finalconfig.getConfigurationSection("atm_groups").getKeys(false)){
+				List<String> list = Main.finalconfig.getStringList("atm_groups." + key);
+				if(list.contains(p.getWorld().getName())){
+					return p.getName() + "_TimBANK_" + key;
+				}
+			}
+		}
+		return p.getName() + "_TimBANK";*/
 	}
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent e){
@@ -84,19 +153,16 @@ public class ATM implements Listener, CommandExecutor {
 			if(e.getInventory().getTitle() == null) return;
 			if(e.getInventory().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
 				e.setResult(Result.DENY);
+				Player p = (Player) e.getWhoClicked();
 				//e.setCancelled(true);
-				String bank = getBank((Player)e.getWhoClicked());
 				if(e.getCurrentItem() != null){
 					if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_withdraw").replace('&', '§'))){
 	
 						double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
 						
-						if(!Main.economy.hasAccount(bank)){
-							Main.economy.createPlayerAccount(bank);
-						}
-						if(Main.economy.has(bank, amount)){
-							Main.economy.withdrawPlayer(bank, amount);
-							Main.economy.depositPlayer((Player) e.getWhoClicked(), amount);
+						if(ATM.bankHas(p, amount)){
+							ATM.withdrawBank(p, amount);
+							Main.economy.depositPlayer(p, amount);
 							e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " " + Main.economy.format(amount));
 						}else{
 							e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoneyinbank").replace('&', '§'));
@@ -107,10 +173,7 @@ public class ATM implements Listener, CommandExecutor {
 						double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
 						
 						if(Main.economy.has((Player) e.getWhoClicked(), amount)){
-							if(!Main.economy.hasAccount(bank)){
-								Main.economy.createPlayerAccount(bank);
-							}
-							Main.economy.depositPlayer(bank, amount);
+							ATM.depositBank(p, amount);
 							Main.economy.withdrawPlayer((Player) e.getWhoClicked(), amount);
 							e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " " + Main.economy.format(amount));
 						}else{
@@ -119,7 +182,7 @@ public class ATM implements Listener, CommandExecutor {
 					}
 					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 					ItemMeta im = is.getItemMeta();
-					im.setDisplayName("§cBank balance: " + getBankbalance(e.getWhoClicked().getName() + "_TimBANK"));
+					im.setDisplayName("§cBank balance: " + ATM.getBankBalance(p));
 					is.setItemMeta(im);
 					e.getInventory().setItem(4, is);
 				}
@@ -128,19 +191,14 @@ public class ATM implements Listener, CommandExecutor {
 			
 		}
 	}
-	public double getBankbalance(String name){
-			
-			return Main.economy.getBalance(name);
-	}
 	private void openGUI(Player player) {
-		String bank = getBank(player);
-		
+		convertOldBank(player);
 		Inventory atm_gui = Bukkit.createInventory(null, 9, "§cATM");
 		
 		//
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(getBankbalance(bank)));
+		im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(ATM.getBankBalance(player)));
 		is.setItemMeta(im);
 		atm_gui.setItem(4, is);
 		

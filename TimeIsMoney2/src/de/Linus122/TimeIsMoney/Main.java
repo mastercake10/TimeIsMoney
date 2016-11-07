@@ -55,7 +55,7 @@ public class Main extends JavaPlugin{
 	ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	
 	public static int cfg_version = 12;
-	public static int pl_version = 1937;
+	public static int pl_version = 1938;
 
 	int currentDay = 0;
 	
@@ -322,11 +322,7 @@ public class Main extends JavaPlugin{
 		
 		//DEPOSIT
 		if(finalconfig.getBoolean("store-money-in-bank")){
-			String bank = ATM.getBank(p);
-			if(!Main.economy.hasAccount(bank)){
-				Main.economy.createPlayerAccount(bank);
-			}
-			Main.economy.depositPlayer(bank, payout.payout_amount);
+			ATM.depositBank(p, payout.payout_amount);
 		}else{
 			double before = 0;
 			if(economy.hasAccount(p)){

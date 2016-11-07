@@ -28,10 +28,8 @@ public class VersionChecker {
 			return Integer.parseInt(get_content(con));
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return 9999999;
 		}
-		return 0;
 
 	}
 	public static void download(File location) throws IOException{
