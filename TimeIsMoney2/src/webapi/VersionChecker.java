@@ -24,7 +24,7 @@ public class VersionChecker {
 		try {
 			URLConnection con = new URL(url_check_version + Main.pl_version).openConnection();
 			con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-
+			
 			return Integer.parseInt(get_content(con));
 			
 		} catch (IOException e) {
@@ -50,7 +50,7 @@ public class VersionChecker {
 		fos.close();
 	}
     public static String get_content(URLConnection con){
-		String content = "";
+		String content = "99999999";
 		if(con!=null){
 				
 		try {
