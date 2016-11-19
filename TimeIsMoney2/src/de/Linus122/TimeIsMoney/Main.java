@@ -29,6 +29,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -54,8 +55,8 @@ public class Main extends JavaPlugin{
 	
 	ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	
-	public static int cfg_version = 12;
-	public static int pl_version = 1938;
+	public static int CFG_VERSION = 12;
+	public static int PL_VERSION;
 
 	int currentDay = 0;
 	
@@ -66,7 +67,7 @@ public class Main extends JavaPlugin{
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
 	public void onEnable(){
-		
+		PL_VERSION = Integer.parseInt(((Plugin)this).getDescription().getVersion());
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		
 		currentDay = (new Date()).getDay();
@@ -76,7 +77,7 @@ public class Main extends JavaPlugin{
 			YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);	
 			String old_config = "config_old " + cfg.getInt("configuration-version") + ".yml";
 			if(cfg.contains("configuration-version")){
-				if(cfg.getInt("configuration-version") < cfg_version){
+				if(cfg.getInt("configuration-version") < CFG_VERSION){
 					clogger.sendMessage("[TimeIsMoney] §cYOU ARE USING AN OLD CONFIG-VERSION. The plugin CANT work with this.");
 					clogger.sendMessage("[TimeIsMoney] §cI have created an new config for you. The old one is saved as config_old.yml.");
 					config.renameTo(new File("plugins/TimeIsMoney/" + old_config));
@@ -141,7 +142,7 @@ public class Main extends JavaPlugin{
 
 			Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable(){
 				public void run(){
-					if(Main.pl_version < VersionChecker.getVersion()){
+					if(Main.PL_VERSION < VersionChecker.getVersion()){
 						clogger.sendMessage("[TimeIsMoney] §cYou are using an old version, I will update this plugin for you.");
 						//Update
 						URL loc = Bukkit.getPluginManager().getPlugin("TimeIsMoney").getClass().getProtectionDomain().getCodeSource().getLocation();
@@ -187,9 +188,9 @@ public class Main extends JavaPlugin{
         }
 
 		if(Bukkit.getPluginManager().isPluginEnabled("Essentials")){
-			this.getLogger().severe("Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
+			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
-		clogger.sendMessage("§aTime is Money §2v" + pl_version + " started.");
+		clogger.sendMessage("§aTime is Money §2v" + PL_VERSION + " started.");
 	}
 	@Override
 	public void onDisable(){
