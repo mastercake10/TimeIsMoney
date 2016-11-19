@@ -1,9 +1,8 @@
 # TimeIsMoney
 
 
-[![Build Status](https://travis-ci.org/mastercake10/TimeIsMoney.svg?branch=master)](https://travis-ci.org/mastercake10/TimeIsMoney)
 
-TimeIsMoney for Minecraft 1.7 - 1.10.2
+TimeIsMoney for Minecraft 1.7 - 1.11.x
 
 Contributing:
 
