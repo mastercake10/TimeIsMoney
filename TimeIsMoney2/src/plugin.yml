@@ -3,7 +3,7 @@ depends: [Vault]
 soft-depends: [Essentials]
 author: Linus122
 main: de.Linus122.TimeIsMoney.Main
-version: 1944
+version: 1945
 description: Gives money for online time
 commands:
    timeismoney:
