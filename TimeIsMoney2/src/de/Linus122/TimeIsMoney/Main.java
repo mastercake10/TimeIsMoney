@@ -401,6 +401,7 @@ public class Main extends JavaPlugin{
 			}
 	}
 	public void sendMessage(Player p, String msg){
+		if(msg == null) return;
 		if(msg.length() == 0) return;
 		p.sendMessage(msg.replace('&', '§'));
 	}
