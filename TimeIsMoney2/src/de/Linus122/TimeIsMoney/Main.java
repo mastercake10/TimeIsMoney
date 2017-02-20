@@ -65,6 +65,7 @@ public class Main extends JavaPlugin{
 	boolean use18Features = true;
 	
 	public static List<String> disabledWorlds;
+	public static HashMap<String, Player> boundIPs = new HashMap<String, Player>();
 	
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -104,6 +105,9 @@ public class Main extends JavaPlugin{
 			public void run(){
 				for(Player p : Bukkit.getOnlinePlayers()){
 					if(disabledWorlds.contains(p.getWorld().getName())) continue;
+					if(!boundIPs.containsKey(p.getAddress().getHostName())){
+						boundIPs.put(p.getAddress().getHostName(), p);
+					}
 					if(onlineSeconds.containsKey(p)){
 						
 						onlineSeconds.put(p, onlineSeconds.get(p) + 1);
@@ -294,6 +298,15 @@ public class Main extends JavaPlugin{
 			}	
 		}
 		
+		if(!finalconfig.getBoolean("allow-multiple-accounts")){
+			if(boundIPs.containsKey(p.getAddress().getHostName())){
+				if(boundIPs.get(p.getAddress().getHostName()) != p){
+					sendMessage(p, finalconfig.getString("message_multiple_ips"));
+					return;
+				}
+			}
+		}
+		
 		//AFK CHECK
 		if(!finalconfig.getBoolean("afk_payout") && !p.hasPermission("tim.afkbypass")){
 			//ESENTIALS_AFK_FEATURE
@@ -354,7 +367,7 @@ public class Main extends JavaPlugin{
 		}else{
 			payedMoney.put(p.getName(), payout.payout_amount);
 		}
-		
+
 		lastLocation.put(p, p.getLocation());
 	
 	}

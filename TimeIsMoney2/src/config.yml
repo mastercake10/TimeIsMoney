@@ -16,6 +16,9 @@ display-messages-in-actionbar-time: 10
 give_money_every_second: 600
 store-money-in-bank: false
 
+# Define if multiple accounts should get payed with the same ip-address. You may disable this if your players are using multiple acconts per ip. 
+allow-multiple-accounts: true
+
 # Payouts will be delivered by "chance" instead "permission".
 choose-payout-by-chance: false
 
@@ -40,6 +43,7 @@ payouts:
 message: "&aYou earned &c%money% &afor 10 minutes online time!"
 message_payoutlimit_reached: "&cYou have reached the payout limit today. You earned 0$"
 message_afk: "&cYou havn't earned money because you were afk!"
+message_multiple_ips: "&cYou havn't earned money because you're playing with multiple accounts!"
 message_actionbar: "&aYou earned &c%money% &afor 10 minutes online time!"
 message_payoutlimit_reached_actionbar: "&cYou have reached the payout limit today. You got 0$"
 message_afk_actionbar: "&cYou havn't earned money because you were afk!"
