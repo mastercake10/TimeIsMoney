@@ -19,17 +19,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -45,9 +44,9 @@ public class Main extends JavaPlugin{
 	List<Payout> payouts = new ArrayList<Payout>();
 	HashMap<String, Double> payedMoney = new HashMap<String, Double>();
 	
-	HashMap<Player, Integer> onlineSeconds = new HashMap<Player, Integer>();
+	HashMap<UUID, Integer> onlineSeconds = new HashMap<UUID, Integer>();
 	
-	HashMap<Player, Location> lastLocation = new HashMap<Player, Location>();
+	HashMap<UUID, Location> lastLocation = new HashMap<UUID, Location>();
 	
 	public static Economy economy = null;
 	public static Utils utils = null;
@@ -65,7 +64,7 @@ public class Main extends JavaPlugin{
 	boolean use18Features = true;
 	
 	public static List<String> disabledWorlds;
-	public static HashMap<String, Player> boundIPs = new HashMap<String, Player>();
+	public static HashMap<String, UUID> boundIPs = new HashMap<String, UUID>();
 	
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -106,17 +105,17 @@ public class Main extends JavaPlugin{
 				for(Player p : Bukkit.getOnlinePlayers()){
 					if(disabledWorlds.contains(p.getWorld().getName())) continue;
 					if(!boundIPs.containsKey(p.getAddress().getHostName())){
-						boundIPs.put(p.getAddress().getHostName(), p);
+						boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
 					}
-					if(onlineSeconds.containsKey(p)){
+					if(onlineSeconds.containsKey(p.getUniqueId())){
 						
-						onlineSeconds.put(p, onlineSeconds.get(p) + 1);
+						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
 					}else{
-						onlineSeconds.put(p, 1);
+						onlineSeconds.put(p.getUniqueId(), 1);
 					}
-					if(onlineSeconds.get(p) > seconds){
+					if(onlineSeconds.get(p.getUniqueId()) > seconds){
 						pay(p);
-						onlineSeconds.remove(p);
+						onlineSeconds.remove(p.getUniqueId());
 					}
 				}
 			}
@@ -300,7 +299,7 @@ public class Main extends JavaPlugin{
 		
 		if(!finalconfig.getBoolean("allow-multiple-accounts")){
 			if(boundIPs.containsKey(p.getAddress().getHostName())){
-				if(boundIPs.get(p.getAddress().getHostName()) != p){
+				if(!boundIPs.get(p.getAddress().getHostName()).equals(p.getUniqueId())){
 					sendMessage(p, finalconfig.getString("message_multiple_ips"));
 					return;
 				}
@@ -324,8 +323,8 @@ public class Main extends JavaPlugin{
 			    }
 			}else
 			//PLUGIN_AFK_FEATURE
-			if(lastLocation.containsKey(p)){ //AntiAFK
-				if(lastLocation.get(p).getX() == p.getLocation().getX() && lastLocation.get(p).getY() == p.getLocation().getY() && lastLocation.get(p).getZ() == p.getLocation().getZ() || lastLocation.get(p).getYaw() == p.getLocation().getYaw()){
+			if(lastLocation.containsKey(p.getUniqueId())){ //AntiAFK
+				if(lastLocation.get(p.getUniqueId()).getX() == p.getLocation().getX() && lastLocation.get(p.getUniqueId()).getY() == p.getLocation().getY() && lastLocation.get(p.getUniqueId()).getZ() == p.getLocation().getZ() || lastLocation.get(p.getUniqueId()).getYaw() == p.getLocation().getYaw()){
 					//AFK
 					if(finalconfig.getBoolean("display-messages-in-chat")){
 						sendMessage(p, finalconfig.getString("message_afk"));	
@@ -368,7 +367,7 @@ public class Main extends JavaPlugin{
 			payedMoney.put(p.getName(), payout.payout_amount);
 		}
 
-		lastLocation.put(p, p.getLocation());
+		lastLocation.put(p.getUniqueId(), p.getLocation());
 	
 	}
 	@SuppressWarnings("deprecation")
