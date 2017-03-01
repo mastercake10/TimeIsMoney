@@ -100,7 +100,7 @@ public class Main extends JavaPlugin{
 		finalconfig = YamlConfiguration.loadConfiguration(config);
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
 		final int seconds = getConfig().getInt("give_money_every_second");
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable(){
+		Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable(){
 			public void run(){
 				for(Player p : Bukkit.getOnlinePlayers()){
 					if(disabledWorlds.contains(p.getWorld().getName())) continue;
