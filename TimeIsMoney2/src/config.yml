@@ -1,6 +1,5 @@
 configuration-version: 12
 
-auto-update: true
 debug-log: false
 
 # You can disable the plugin's payout feature in certain worlds

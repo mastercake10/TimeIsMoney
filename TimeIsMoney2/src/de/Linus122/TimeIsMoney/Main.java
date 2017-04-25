@@ -37,7 +37,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import modules.atm.ATM;
 import net.milkbowl.vault.economy.Economy;
-import webapi.VersionChecker;
 
 public class Main extends JavaPlugin{
 	
@@ -145,37 +144,10 @@ public class Main extends JavaPlugin{
 		}
 		
 		loadPayouts();
-		if(this.getConfig().getBoolean("auto-update")){
-
-			Bukkit.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable(){
-				public void run(){
-					if(Main.PL_VERSION < VersionChecker.getVersion()){
-						clogger.sendMessage("[TimeIsMoney] §cYou are using an old version, I will update this plugin for you.");
-						//Update
-						URL loc = Bukkit.getPluginManager().getPlugin("TimeIsMoney").getClass().getProtectionDomain().getCodeSource().getLocation();
-						Bukkit.getUpdateFolderFile().mkdir();
-						File file = new File(Bukkit.getUpdateFolderFile().getPath() + "/" + loc.getFile().split("/")[loc.getFile().split("/").length - 1]);
-						
-						try {
-							VersionChecker.download(file);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						clogger.sendMessage("[TimeIsMoney] §aSuccess! Downloaded v" + VersionChecker.getVersion());
-						try {
-							reloadPlugin("TimeIsMoney");
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-			},0L, 20L * 60 * 20);
-		}
 		
 		
-		 String packageName = this.getServer().getClass().getPackage().getName();
+		
+		String packageName = this.getServer().getClass().getPackage().getName();
         // Get full package string of CraftServer.
         // org.bukkit.craftbukkit.version
         String Bukkitversion = packageName.substring(packageName.lastIndexOf('.') + 1);
@@ -197,7 +169,7 @@ public class Main extends JavaPlugin{
 		if(Bukkit.getPluginManager().isPluginEnabled("Essentials")){
 			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
-		clogger.sendMessage("§aTime is Money §2v" + PL_VERSION + " started.");
+		clogger.sendMessage("§aTime is Money §2v" + PL_VERSION + " §astarted.");
 	}
 	@Override
 	public void onDisable(){
