@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
@@ -329,7 +330,7 @@ public class Main extends JavaPlugin{
 			sendActionbar(p, message.replace("%money%", economy.format(payout.payout_amount)));
 		}
 		for(String cmd : payout.commands){
-			this.getServer().dispatchCommand(this.getServer().getConsoleSender(), cmd.replace("/", "").replaceAll("%player%", p.getName()));
+			dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
 		}
 		
 		//ADD PAYED MONEY
@@ -341,6 +342,16 @@ public class Main extends JavaPlugin{
 
 		lastLocation.put(p.getUniqueId(), p.getLocation());
 	
+	}
+	public void dispatchCommandSync(final String cmd){
+		final Server server = this.getServer();
+		
+		this.getServer().getScheduler().runTask(this, new Runnable(){
+			
+			public void run(){
+				server.dispatchCommand(server.getConsoleSender(), cmd);
+			}
+		});
 	}
 	@SuppressWarnings("deprecation")
 	public void log(String msg){

@@ -73,6 +73,12 @@ public class ATM implements Listener, CommandExecutor {
 		}
 		
 	}
+	//Doesn't support groups 
+	public static double getBankBalance(OfflinePlayer p){
+		String bankString =  p.getName() + "_TimBANK";
+		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
+		return cfg.getDouble(bankString);
+	}
 	public static double getBankBalance(Player p){
 		String bankString = getBankString(p);
 		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
@@ -341,18 +347,32 @@ public class ATM implements Listener, CommandExecutor {
 		}
 		if(cs.hasPermission("tim.admin")){
 			if(args.length > 0){
-				@SuppressWarnings("deprecation")
-				OfflinePlayer op = Bukkit.getOfflinePlayer(args[0]);
-				if(op == null){
-					cs.sendMessage("Player is offline");
-					return true;
+				switch(args[0]){
+					case "balance":
+						if(args.length > 1){		
+							cs.sendMessage("§2ATM-Balance of§c " + args[1] + "§2: §c" + this.getBankBalance(Bukkit.getOfflinePlayer(args[1])));
+						}else{
+							cs.sendMessage("/atm balance <player>");
+						}
+						break;
+					default:
+						@SuppressWarnings("deprecation")
+						OfflinePlayer op = Bukkit.getOfflinePlayer(args[0]);
+						if(op == null){
+							cs.sendMessage("Player is offline");
+							return true;
+						}
+						if(op.isOnline()){
+							openGUI(op.getPlayer());
+							cs.sendMessage("opened!");
+						}
+						break;
+						
 				}
-				if(op.isOnline()){
-					openGUI(op.getPlayer());
-					cs.sendMessage("opened!");
-				}
+			
 			}else{
-				cs.sendMessage("/atm <player>");
+				cs.sendMessage("§c/atm <player> §a- opens atm for player");
+				cs.sendMessage("§c/atm balance <player> §a- gets balance of player");
 				return true;
 			}
 		}
