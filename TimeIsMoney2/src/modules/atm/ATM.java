@@ -192,7 +192,7 @@ public class ATM implements Listener, CommandExecutor {
 					}
 					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 					ItemMeta im = is.getItemMeta();
-					im.setDisplayName("§cBank balance: " + ATM.getBankBalance(p));
+					im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(ATM.getBankBalance(p)));
 					is.setItemMeta(im);
 					e.getInventory().setItem(4, is);
 				}
@@ -203,7 +203,7 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	private void openGUI(Player player) {
 		convertOldBank(player);
-		Inventory atm_gui = Bukkit.createInventory(null, 9, "§cATM");
+		Inventory atm_gui = Bukkit.createInventory(null, 9, Main.finalconfig.getString("atm_title").replace('&', '§'));
 		
 		//
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
