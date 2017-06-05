@@ -37,6 +37,8 @@ public class ATM implements Listener, CommandExecutor {
 	public static YamlConfiguration cfg;
 	public static File fileBankAccounts = new File("plugins/TimeIsMoney/data.dat");
 	
+	double[] worths = {10000, 1000, 100, 10};
+	
 	public ATM(Main pl){
 		this.pl = pl;
 		pl.getServer().getPluginManager().registerEvents(this, pl);
@@ -162,9 +164,10 @@ public class ATM implements Listener, CommandExecutor {
 				Player p = (Player) e.getWhoClicked();
 				//e.setCancelled(true);
 				if(e.getCurrentItem() != null){
-					if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_withdraw").replace('&', '§'))){
+					// left side
+					if(e.getSlot() < 4){
 	
-						double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
+						double amount = worths[e.getSlot()];
 						
 						if(ATM.bankHas(p, amount)){
 							ATM.withdrawBank(p, amount);
@@ -174,9 +177,10 @@ public class ATM implements Listener, CommandExecutor {
 							e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoneyinbank").replace('&', '§'));
 						}
 					}else
-					if(e.getCurrentItem().getItemMeta().getDisplayName().split(" ")[0].equals(Main.finalconfig.getString("atm_deposit").replace('&', '§'))){
+					// right side
+					if(e.getSlot() > 4){
 						
-						double amount = Double.parseDouble(e.getCurrentItem().getItemMeta().getLore().get(0));
+						double amount = worths[worths.length - (e.getSlot() - 5) - 1];
 						
 						if(Main.economy.has((Player) e.getWhoClicked(), amount)){
 							ATM.depositBank(p, amount);
@@ -213,9 +217,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(10));
-		List<String> lore = new ArrayList<String>();
-		lore.add("10");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(3, is);
 		
@@ -223,10 +224,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') +  " §a" + Main.economy.format(100));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("100");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(2, is);
 		
@@ -234,10 +231,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(1000));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("1000");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(1, is);
 		
@@ -245,10 +238,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(10000));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("10000");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(0, is);
 		
@@ -257,10 +246,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(10));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("10");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(5, is);
 		
@@ -268,10 +253,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(100));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("100");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(6, is);
 		
@@ -279,10 +260,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(1000));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("1000");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(7, is);
 		
@@ -290,10 +267,6 @@ public class ATM implements Listener, CommandExecutor {
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(10000));
-		lore.clear();
-		lore = new ArrayList<String>();
-		lore.add("10000");
-		im.setLore(lore);
 		is.setItemMeta(im);
 		atm_gui.setItem(8, is);
 		
