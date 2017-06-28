@@ -102,21 +102,25 @@ public class Main extends JavaPlugin{
 		final int seconds = getConfig().getInt("give_money_every_second");
 		Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable(){
 			public void run(){
-				for(Player p : Bukkit.getOnlinePlayers()){
-					if(disabledWorlds.contains(p.getWorld().getName())) continue;
-					if(!boundIPs.containsKey(p.getAddress().getHostName())){
-						boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
+				try{
+					for(Player p : Bukkit.getOnlinePlayers()){
+						if(disabledWorlds.contains(p.getWorld().getName())) continue;
+						if(!boundIPs.containsKey(p.getAddress().getHostName())){
+							boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
+						}
+						if(onlineSeconds.containsKey(p.getUniqueId())){
+							
+							onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
+						}else{
+							onlineSeconds.put(p.getUniqueId(), 1);
+						}
+						if(onlineSeconds.get(p.getUniqueId()) > seconds){
+							pay(p);
+							onlineSeconds.remove(p.getUniqueId());
+						}
 					}
-					if(onlineSeconds.containsKey(p.getUniqueId())){
-						
-						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
-					}else{
-						onlineSeconds.put(p.getUniqueId(), 1);
-					}
-					if(onlineSeconds.get(p.getUniqueId()) > seconds){
-						pay(p);
-						onlineSeconds.remove(p.getUniqueId());
-					}
+				}catch(NullPointerException e){
+					// 
 				}
 			}
 		}, 20L, 20L);
