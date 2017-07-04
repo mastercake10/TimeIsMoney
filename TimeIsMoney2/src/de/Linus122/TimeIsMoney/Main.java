@@ -95,7 +95,7 @@ public class Main extends JavaPlugin{
 			this.saveDefaultConfig();
 		}
 		
-		new ATM(this);
+		if(getConfig().getBoolean("enable_atm")) new ATM(this);
 		
 		finalconfig = YamlConfiguration.loadConfiguration(config);
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
@@ -174,6 +174,8 @@ public class Main extends JavaPlugin{
 		if(Bukkit.getPluginManager().isPluginEnabled("Essentials")){
 			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
+		new Metrics(this);
+
 		clogger.sendMessage("§aTime is Money §2v" + PL_VERSION + " §astarted.");
 	}
 	@Override

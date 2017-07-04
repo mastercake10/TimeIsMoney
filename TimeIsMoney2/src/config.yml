@@ -51,6 +51,7 @@ message_atm_nomoneyinbank: "&cYou don't have enough money in bank!"
 message_atm_nomoney: "&cYou don't have enough money!"
 
 # ATM -> Place down a sign with [atm] on the first line to use it!
+enable_atm: true
 atm_title: "&cATM"
 atm_withdraw: "&cWithdraw"
 atm_deposit: "&cDeposit"
