@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -95,10 +96,13 @@ public class Main extends JavaPlugin{
 			this.saveDefaultConfig();
 		}
 		
-		if(getConfig().getBoolean("enable_atm")) new ATM(this);
 		
+	    
 		finalconfig = YamlConfiguration.loadConfiguration(config);
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
+		
+		if(getConfig().getBoolean("enable_atm")) new ATM(this);
+		
 		final int seconds = getConfig().getInt("give_money_every_second");
 		Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable(){
 			public void run(){

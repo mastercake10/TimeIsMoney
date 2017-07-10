@@ -29,6 +29,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
+import com.google.common.primitives.Doubles;
+
 import de.Linus122.TimeIsMoney.Main;
 
 public class ATM implements Listener, CommandExecutor {
@@ -37,7 +39,7 @@ public class ATM implements Listener, CommandExecutor {
 	public static YamlConfiguration cfg;
 	public static File fileBankAccounts = new File("plugins/TimeIsMoney/data.dat");
 	
-	double[] worths = {10000, 1000, 100, 10};
+	double[] worths = new double[4];
 	
 	public ATM(Main pl){
 		this.pl = pl;
@@ -52,6 +54,8 @@ public class ATM implements Listener, CommandExecutor {
 			}	
 		}
 		cfg = YamlConfiguration.loadConfiguration(fileBankAccounts);
+		
+		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
 	}
 	public static void withdrawBank(Player p, double amount){
 		String bankString = getBankString(p);
@@ -167,7 +171,7 @@ public class ATM implements Listener, CommandExecutor {
 					// left side
 					if(e.getSlot() < 4){
 	
-						double amount = worths[e.getSlot()];
+						double amount = worths[3 - e.getSlot()];
 						
 						if(ATM.bankHas(p, amount)){
 							ATM.withdrawBank(p, amount);
@@ -180,7 +184,7 @@ public class ATM implements Listener, CommandExecutor {
 					// right side
 					if(e.getSlot() > 4){
 						
-						double amount = worths[worths.length - (e.getSlot() - 5) - 1];
+						double amount = worths[3 - (3 - (e.getSlot() - 5))];
 						
 						if(Main.economy.has((Player) e.getWhoClicked(), amount)){
 							ATM.depositBank(p, amount);
@@ -216,28 +220,28 @@ public class ATM implements Listener, CommandExecutor {
 		//
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(10));
+		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
 		atm_gui.setItem(3, is);
 		
 		//
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') +  " §a" + Main.economy.format(100));
+		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') +  " §a" + Main.economy.format(worths[1]));
 		is.setItemMeta(im);
 		atm_gui.setItem(2, is);
 		
 		//
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(1000));
+		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[2]));
 		is.setItemMeta(im);
 		atm_gui.setItem(1, is);
 		
 		//
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(10000));
+		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[3]));
 		is.setItemMeta(im);
 		atm_gui.setItem(0, is);
 		
@@ -245,28 +249,28 @@ public class ATM implements Listener, CommandExecutor {
 		//
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(10));
+		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
 		atm_gui.setItem(5, is);
 		
 		//
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(100));
+		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[1]));
 		is.setItemMeta(im);
 		atm_gui.setItem(6, is);
 		
 		//
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(1000));
+		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[2]));
 		is.setItemMeta(im);
 		atm_gui.setItem(7, is);
 		
 		//
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(10000));
+		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[3]));
 		is.setItemMeta(im);
 		atm_gui.setItem(8, is);
 		
