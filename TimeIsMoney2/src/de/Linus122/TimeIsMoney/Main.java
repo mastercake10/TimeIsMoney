@@ -39,10 +39,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import modules.atm.ATM;
 import net.milkbowl.vault.economy.Economy;
 
+import static de.Linus122.TimeIsMoney.Utils.CC;
+
 public class Main extends JavaPlugin {
 
     public static Economy economy = null;
-    private static Utils utils = null;
+    private static ActionBarUtils actionBarUtils = null;
     private static final int CFG_VERSION = 12;
     public static int PL_VERSION;
     public static YamlConfiguration finalconfig;
@@ -71,8 +73,8 @@ public class Main extends JavaPlugin {
             String old_config = "config_old " + cfg.getInt("configuration-version") + ".yml";
             if (cfg.contains("configuration-version")) {
                 if (cfg.getInt("configuration-version") < CFG_VERSION) {
-                    clogger.sendMessage("[TimeIsMoney] �cYOU ARE USING AN OLD CONFIG-VERSION. The plugin CANT work with this.");
-                    clogger.sendMessage("[TimeIsMoney] �cI have created an new config for you. The old one is saved as config_old.yml.");
+                    clogger.sendMessage(CC("[TimeIsMoney] &cYOU ARE USING AN OLD CONFIG-VERSION. The plugin CANT work with this."));
+                    clogger.sendMessage(CC("[TimeIsMoney] &cI have created an new config for you. The old one is saved as config_old.yml."));
                     config.renameTo(new File("plugins/TimeIsMoney/" + old_config));
                 }
             }
@@ -125,7 +127,7 @@ public class Main extends JavaPlugin {
         setupEconomy();
 
         message = finalconfig.getString("message");
-        message = message.replace('&', '�');
+        message = CC(message);
 
         try {
             FileInputStream fis = new FileInputStream(new File("plugins/TimeIsMoney/payed_today.data"));
@@ -149,7 +151,7 @@ public class Main extends JavaPlugin {
             final Class<?> clazz = Class.forName(Bukkitversion + ".NBTUtils");
             // Check if we have a NMSHandler class at that location.
             if (Utils.class.isAssignableFrom(clazz)) { // Make sure it actually implements NMS
-                utils = (Utils) clazz.getConstructor().newInstance(); // Set our handler
+                actionBarUtils = (ActionBarUtils) clazz.getConstructor().newInstance(); // Set our handler
 
             }
 
@@ -164,7 +166,7 @@ public class Main extends JavaPlugin {
         }
         new Metrics(this);
 
-        clogger.sendMessage("�aTime is Money �2v" + PL_VERSION + " �astarted.");
+        clogger.sendMessage(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
     }
 
     @Override
@@ -209,9 +211,9 @@ public class Main extends JavaPlugin {
                 }
                 payouts.add(payout);
             }
-            clogger.sendMessage("[TimeIsMoney] �aLoaded " + finalconfig.getConfigurationSection("payouts").getKeys(false).size() + " Payouts!");
+            clogger.sendMessage(CC("[TimeIsMoney] &aLoaded " + finalconfig.getConfigurationSection("payouts").getKeys(false).size() + " Payouts!"));
         } catch (Exception e) {
-            clogger.sendMessage("[TimeIsMoney] �aFailed to load Payouts! (May made a mistake in config.yml?)");
+            clogger.sendMessage(CC("[TimeIsMoney] &aFailed to load Payouts! (May made a mistake in config.yml?)"));
         }
     }
 
@@ -381,23 +383,23 @@ public class Main extends JavaPlugin {
     private void sendMessage(Player p, String msg) {
         if (msg == null) return;
         if (msg.length() == 0) return;
-        p.sendMessage(msg.replace('&', '�'));
+        p.sendMessage(CC(msg));
     }
 
     private void sendActionbar(final Player p, final String msg) {
         if (msg.length() == 0) return;
         int times = finalconfig.getInt("display-messages-in-actionbar-time");
         if (times == 1) {
-            if (utils != null) {
-                utils.sendActionBarMessage(p, msg);
+            if (actionBarUtils != null) {
+                actionBarUtils.sendActionBarMessage(p, msg);
             }
         } else if (times > 1) {
-            if (utils != null) {
-                utils.sendActionBarMessage(p, msg);
+            if (actionBarUtils != null) {
+                actionBarUtils.sendActionBarMessage(p, msg);
             }
             times--;
             for (int i = 0; i < times; i++) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> utils.sendActionBarMessage(p, msg.replace('&', '�')), 20L * i);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> actionBarUtils.sendActionBarMessage(p, CC(msg)), 20L * i);
             }
         }
     }

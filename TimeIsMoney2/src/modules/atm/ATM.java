@@ -33,6 +33,8 @@ import com.google.common.primitives.Doubles;
 
 import de.Linus122.TimeIsMoney.Main;
 
+import static de.Linus122.TimeIsMoney.Utils.CC;
+
 public class ATM implements Listener, CommandExecutor {
 	Plugin pl;
 	
@@ -103,7 +105,7 @@ public class ATM implements Listener, CommandExecutor {
 		String bankString = getBankString(p);
 		if(Main.economy.hasAccount(bankString)){
 			if(Main.economy.getBalance(bankString) > 0){
-				p.sendMessage("§aSuccessfully converted your old TIM-Bank to new version!");
+				p.sendMessage(CC("&aSuccessfully converted your old TIM-Bank to new version!"));
 				depositBank(p, Main.economy.getBalance(bankString));
 				Main.economy.withdrawPlayer(bankString, Main.economy.getBalance(bankString));	
 			}
@@ -138,9 +140,9 @@ public class ATM implements Listener, CommandExecutor {
 		if(e.getClickedBlock() != null){
 			if(e.getClickedBlock().getType() == Material.WALL_SIGN || e.getClickedBlock().getType() == Material.SIGN || e.getClickedBlock().getType() == Material.SIGN_POST){
 				Sign sign = (Sign) e.getClickedBlock().getState();	
-				if(sign.getLine(0).equalsIgnoreCase("§cATM")){
+				if(sign.getLine(0).equalsIgnoreCase(CC("&cATM"))){
 					if(!e.getPlayer().hasPermission("tim.atm.use")){
-						e.getPlayer().sendMessage(Main.finalconfig.getString("message_atm_noperms").replace('&', '§'));
+						e.getPlayer().sendMessage(Main.finalconfig.getString("message_atm_noperms").replace('&', 'ï¿½'));
 					}else{
 						this.openGUI(e.getPlayer());
 					}
@@ -152,7 +154,7 @@ public class ATM implements Listener, CommandExecutor {
 	public void onMove(InventoryMoveItemEvent e){
 		if(e.getSource() == null) return;
 		if(e.getSource().getTitle() == null) return;
-		if(e.getSource().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
+		if(e.getSource().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', 'ï¿½'))){
 			e.setCancelled(true);
 		}
 	}
@@ -163,7 +165,7 @@ public class ATM implements Listener, CommandExecutor {
 			if(e == null) return;
 			if(e.getInventory() == null) return;
 			if(e.getInventory().getTitle() == null) return;
-			if(e.getInventory().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
+			if(e.getInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))){
 				e.setResult(Result.DENY);
 				Player p = (Player) e.getWhoClicked();
 				//e.setCancelled(true);
@@ -176,9 +178,9 @@ public class ATM implements Listener, CommandExecutor {
 						if(ATM.bankHas(p, amount)){
 							ATM.withdrawBank(p, amount);
 							Main.economy.depositPlayer(p, amount);
-							e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " " + Main.economy.format(amount));
+							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
 						}else{
-							e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoneyinbank").replace('&', '§'));
+							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
 						}
 					}else
 					// right side
@@ -189,14 +191,14 @@ public class ATM implements Listener, CommandExecutor {
 						if(Main.economy.has((Player) e.getWhoClicked(), amount)){
 							ATM.depositBank(p, amount);
 							Main.economy.withdrawPlayer((Player) e.getWhoClicked(), amount);
-							e.getWhoClicked().sendMessage(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " " + Main.economy.format(amount));
+							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_deposit")) + " " + Main.economy.format(amount));
 						}else{
-							e.getWhoClicked().sendMessage(Main.finalconfig.getString("message_atm_nomoney").replace('&', '§'));
+							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
 						}
 					}
 					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 					ItemMeta im = is.getItemMeta();
-					im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(ATM.getBankBalance(p)));
+					im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
 					is.setItemMeta(im);
 					e.getInventory().setItem(4, is);
 				}
@@ -207,12 +209,12 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	private void openGUI(Player player) {
 		convertOldBank(player);
-		Inventory atm_gui = Bukkit.createInventory(null, 9, Main.finalconfig.getString("atm_title").replace('&', '§'));
+		Inventory atm_gui = Bukkit.createInventory(null, 9, Main.finalconfig.getString("atm_title").replace('&', 'ï¿½'));
 		
 		//
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_balance").replace('&', '§') + " " + Main.economy.format(ATM.getBankBalance(player)));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(player)));
 		is.setItemMeta(im);
 		atm_gui.setItem(4, is);
 		
@@ -220,28 +222,28 @@ public class ATM implements Listener, CommandExecutor {
 		//
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[0]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
 		atm_gui.setItem(3, is);
 		
 		//
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') +  " §a" + Main.economy.format(worths[1]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") +  " &a") + Main.economy.format(worths[1]));
 		is.setItemMeta(im);
 		atm_gui.setItem(2, is);
 		
 		//
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[2]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[2]));
 		is.setItemMeta(im);
 		atm_gui.setItem(1, is);
 		
 		//
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_withdraw").replace('&', '§') + " §a" + Main.economy.format(worths[3]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[3]));
 		is.setItemMeta(im);
 		atm_gui.setItem(0, is);
 		
@@ -249,28 +251,28 @@ public class ATM implements Listener, CommandExecutor {
 		//
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[0]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
 		atm_gui.setItem(5, is);
 		
 		//
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[1]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[1]));
 		is.setItemMeta(im);
 		atm_gui.setItem(6, is);
 		
 		//
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[2]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4" )+ Main.economy.format(worths[2]));
 		is.setItemMeta(im);
 		atm_gui.setItem(7, is);
 		
 		//
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
-		im.setDisplayName(Main.finalconfig.getString("atm_deposit").replace('&', '§') + " §4" + Main.economy.format(worths[3]));
+		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[3]));
 		is.setItemMeta(im);
 		atm_gui.setItem(8, is);
 		
@@ -285,7 +287,7 @@ public class ATM implements Listener, CommandExecutor {
 		if(e == null) return;
 		if(e.getInventory() == null) return;
 		if(e.getInventory().getTitle() == null) return;
-		if(e.getInventory().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '§'))){
+		if(e.getInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))){
 			e.setResult(Result.DENY);
 		}
 	}
@@ -299,13 +301,13 @@ public class ATM implements Listener, CommandExecutor {
 						Sign sign = (Sign) e.getBlock().getState();
 						if(sign.getLine(0).equalsIgnoreCase("[atm]")){
 							if(!e.getPlayer().hasPermission("tim.atm.place")){
-								e.getPlayer().sendMessage("§cYou dont have permissions to build ATM's!");
+								e.getPlayer().sendMessage("ï¿½cYou dont have permissions to build ATM's!");
 								sign.setLine(0, "");
 								return;
 							}else{
-								sign.setLine(0, "§cATM");
+								sign.setLine(0, "ï¿½cATM");
 								sign.update();
-								e.getPlayer().sendMessage("§2ATM created! (You can also write something in the Lins 2-4)");
+								e.getPlayer().sendMessage("ï¿½2ATM created! (You can also write something in the Lins 2-4)");
 							}
 						}
 					}
@@ -327,7 +329,7 @@ public class ATM implements Listener, CommandExecutor {
 				switch(args[0]){
 					case "balance":
 						if(args.length > 1){		
-							cs.sendMessage("§2ATM-Balance of§c " + args[1] + "§2: §c" + this.getBankBalance(Bukkit.getOfflinePlayer(args[1])));
+							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + this.getBankBalance(Bukkit.getOfflinePlayer(args[1])));
 						}else{
 							cs.sendMessage("/atm balance <player>");
 						}
@@ -348,8 +350,8 @@ public class ATM implements Listener, CommandExecutor {
 				}
 			
 			}else{
-				cs.sendMessage("§c/atm <player> §a- opens atm for player");
-				cs.sendMessage("§c/atm balance <player> §a- gets balance of player");
+				cs.sendMessage(CC("&c/atm <player> &a- opens atm for player"));
+				cs.sendMessage(CC("&c/atm balance <player> &a- gets balance of player"));
 				return true;
 			}
 		}
