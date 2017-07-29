@@ -2,7 +2,6 @@ package modules.atm;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -36,12 +35,12 @@ import de.Linus122.TimeIsMoney.Main;
 import static de.Linus122.TimeIsMoney.Utils.CC;
 
 public class ATM implements Listener, CommandExecutor {
-	Plugin pl;
+	private final Plugin pl;
 	
-	public static YamlConfiguration cfg;
-	public static File fileBankAccounts = new File("plugins/TimeIsMoney/data.dat");
+	private static YamlConfiguration cfg;
+	private static final File fileBankAccounts = new File("plugins/TimeIsMoney/data.dat");
 	
-	double[] worths = new double[4];
+	private double[] worths = new double[4];
 	
 	public ATM(Main pl){
 		this.pl = pl;
@@ -51,7 +50,6 @@ public class ATM implements Listener, CommandExecutor {
 			try {
 				fileBankAccounts.createNewFile();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
 		}
@@ -59,7 +57,7 @@ public class ATM implements Listener, CommandExecutor {
 		
 		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
 	}
-	public static void withdrawBank(Player p, double amount){
+	private static void withdrawBank(Player p, double amount){
 		String bankString = getBankString(p);
 		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
 		cfg.set(bankString, getBankBalance(p) - amount);
@@ -71,37 +69,32 @@ public class ATM implements Listener, CommandExecutor {
 		cfg.set(bankString, getBankBalance(p) + amount);
 		saveBanks();
 	}
-	public static boolean bankHas(Player p, double amount){
+	private static boolean bankHas(Player p, double amount){
 		String bankString = getBankString(p);
 		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
-		if(getBankBalance(p) >= amount){
-			return true;
-		}else{
-			return false;
-		}
+		return getBankBalance(p) >= amount;
 		
 	}
 	//Doesn't support groups 
-	public static double getBankBalance(OfflinePlayer p){
+	private static double getBankBalance(OfflinePlayer p){
 		String bankString =  p.getName() + "_TimBANK";
 		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
 		return cfg.getDouble(bankString);
 	}
-	public static double getBankBalance(Player p){
+	private static double getBankBalance(Player p){
 		String bankString = getBankString(p);
 		if(!cfg.contains(bankString)) cfg.set(bankString, 0.0);
 		return cfg.getDouble(bankString);
 	}
-	public static void saveBanks(){
+	private static void saveBanks(){
 		try {
 			cfg.save(fileBankAccounts);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	//Converts old tim bank
-	public static void convertOldBank(Player p){
+	private static void convertOldBank(Player p){
 		String bankString = getBankString(p);
 		if(Main.economy.hasAccount(bankString)){
 			if(Main.economy.getBalance(bankString) > 0){
@@ -203,7 +196,7 @@ public class ATM implements Listener, CommandExecutor {
 					e.getInventory().setItem(4, is);
 				}
 			}
-		}catch(Exception e2){
+		}catch(Exception ignored){
 			
 		}
 	}
@@ -295,24 +288,21 @@ public class ATM implements Listener, CommandExecutor {
 	public void onSign(final SignChangeEvent e){
 		final Block b = e.getBlock();
 		if(b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST){
-			pl.getServer().getScheduler().scheduleSyncDelayedTask(pl, new Runnable(){
-				public void run(){
-					if(b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST){
-						Sign sign = (Sign) e.getBlock().getState();
-						if(sign.getLine(0).equalsIgnoreCase("[atm]")){
-							if(!e.getPlayer().hasPermission("tim.atm.place")){
-								e.getPlayer().sendMessage("�cYou dont have permissions to build ATM's!");
-								sign.setLine(0, "");
-								return;
-							}else{
-								sign.setLine(0, "�cATM");
-								sign.update();
-								e.getPlayer().sendMessage("�2ATM created! (You can also write something in the Lins 2-4)");
-							}
-						}
-					}
-				}
-			}, 10L);
+			pl.getServer().getScheduler().scheduleSyncDelayedTask(pl, () -> {
+                if(b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST){
+                    Sign sign = (Sign) e.getBlock().getState();
+                    if(sign.getLine(0).equalsIgnoreCase("[atm]")){
+                        if(!e.getPlayer().hasPermission("tim.atm.place")){
+                            e.getPlayer().sendMessage("�cYou dont have permissions to build ATM's!");
+                            sign.setLine(0, "");
+                        }else{
+                            sign.setLine(0, "�cATM");
+                            sign.update();
+                            e.getPlayer().sendMessage("�2ATM created! (You can also write something in the Lins 2-4)");
+                        }
+                    }
+                }
+            }, 10L);
 		}
 	}
 
@@ -329,7 +319,7 @@ public class ATM implements Listener, CommandExecutor {
 				switch(args[0]){
 					case "balance":
 						if(args.length > 1){		
-							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + this.getBankBalance(Bukkit.getOfflinePlayer(args[1])));
+							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + getBankBalance(Bukkit.getOfflinePlayer(args[1])));
 						}else{
 							cs.sendMessage("/atm balance <player>");
 						}
