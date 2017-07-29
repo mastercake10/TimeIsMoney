@@ -14,7 +14,7 @@ public class Cmd implements CommandExecutor {
 	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] arg3) {
 		if(cs.hasPermission("tim.reload")){
 			main.reload();
-			cs.sendMessage("§aTime is Money §cv" + main.PL_VERSION + " §areloaded!");
+			cs.sendMessage("ï¿½aTime is Money ï¿½cv" + main.PL_VERSION + " ï¿½areloaded!");
 			
 		}
 		return true;
