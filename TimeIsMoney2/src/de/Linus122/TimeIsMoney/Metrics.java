@@ -43,7 +43,7 @@ public class Metrics {
     }
 
     // The version of this bStats class
-    public static final int B_STATS_VERSION = 1;
+    private static final int B_STATS_VERSION = 1;
 
     // The url to which the data is sent
     private static final String URL = "https://bStats.org/submitData/bukkit";
@@ -146,12 +146,7 @@ public class Metrics {
                 }
                 // Nevertheless we want our code to run in the Bukkit main thread, so we have to use the Bukkit scheduler
                 // Don't be afraid! The connection to the bStats server is still async, only the stats collection is sync ;)
-                Bukkit.getScheduler().runTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        submitData();
-                    }
-                });
+                Bukkit.getScheduler().runTask(plugin, () -> submitData());
             }
         }, 1000*60*5, 1000*60*30);
         // Submit the data every 30 minutes, first time after 5 minutes to give other plugins enough time to start
@@ -246,17 +241,14 @@ public class Metrics {
         data.put("plugins", pluginData);
 
         // Create a new thread for the connection to the bStats server
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // Send the data
-                    sendData(data);
-                } catch (Exception e) {
-                    // Something went wrong! :(
-                    if (logFailedRequests) {
-                        plugin.getLogger().log(Level.WARNING, "Could not submit plugin stats of " + plugin.getName(), e);
-                    }
+        new Thread(() -> {
+            try {
+                // Send the data
+                sendData(data);
+            } catch (Exception e) {
+                // Something went wrong! :(
+                if (logFailedRequests) {
+                    plugin.getLogger().log(Level.WARNING, "Could not submit plugin stats of " + plugin.getName(), e);
                 }
             }
         }).start();
@@ -323,7 +315,7 @@ public class Metrics {
     public static abstract class CustomChart {
 
         // The id of the chart
-        protected final String chartId;
+        final String chartId;
 
         /**
          * Class constructor.
@@ -337,7 +329,7 @@ public class Metrics {
             this.chartId = chartId;
         }
 
-        protected JSONObject getRequestJsonObject() {
+        JSONObject getRequestJsonObject() {
             JSONObject chart = new JSONObject();
             chart.put("chartId", chartId);
             try {
@@ -421,7 +413,7 @@ public class Metrics {
         protected JSONObject getChartData() {
             JSONObject data = new JSONObject();
             JSONObject values = new JSONObject();
-            HashMap<String, Integer> map = getValues(new HashMap<String, Integer>());
+            HashMap<String, Integer> map = getValues(new HashMap<>());
             if (map == null || map.isEmpty()) {
                 // Null = skip the chart
                 return null;
@@ -505,7 +497,7 @@ public class Metrics {
         protected JSONObject getChartData() {
             JSONObject data = new JSONObject();
             JSONObject values = new JSONObject();
-            HashMap<String, Integer> map = getValues(new HashMap<String, Integer>());
+            HashMap<String, Integer> map = getValues(new HashMap<>());
             if (map == null || map.isEmpty()) {
                 // Null = skip the chart
                 return null;
@@ -555,7 +547,7 @@ public class Metrics {
         protected JSONObject getChartData() {
             JSONObject data = new JSONObject();
             JSONObject values = new JSONObject();
-            HashMap<String, Integer> map = getValues(new HashMap<String, Integer>());
+            HashMap<String, Integer> map = getValues(new HashMap<>());
             if (map == null || map.isEmpty()) {
                 // Null = skip the chart
                 return null;
@@ -598,7 +590,7 @@ public class Metrics {
         protected JSONObject getChartData() {
             JSONObject data = new JSONObject();
             JSONObject values = new JSONObject();
-            HashMap<String, int[]> map = getValues(new HashMap<String, int[]>());
+            HashMap<String, int[]> map = getValues(new HashMap<>());
             if (map == null || map.isEmpty()) {
                 // Null = skip the chart
                 return null;
@@ -688,7 +680,7 @@ public class Metrics {
         protected JSONObject getChartData() {
             JSONObject data = new JSONObject();
             JSONObject values = new JSONObject();
-            HashMap<Country, Integer> map = getValues(new HashMap<Country, Integer>());
+            HashMap<Country, Integer> map = getValues(new HashMap<>());
             if (map == null || map.isEmpty()) {
                 // Null = skip the chart
                 return null;
@@ -736,7 +728,7 @@ public class Metrics {
         AUSTRIA("AT", "Austria"),
         AUSTRALIA("AU", "Australia"),
         ARUBA("AW", "Aruba"),
-        ALAND_ISLANDS("AX", "Åland Islands"),
+        ALAND_ISLANDS("AX", "ï¿½land Islands"),
         AZERBAIJAN("AZ", "Azerbaijan"),
         BOSNIA_AND_HERZEGOVINA("BA", "Bosnia and Herzegovina"),
         BARBADOS("BB", "Barbados"),
@@ -747,7 +739,7 @@ public class Metrics {
         BAHRAIN("BH", "Bahrain"),
         BURUNDI("BI", "Burundi"),
         BENIN("BJ", "Benin"),
-        SAINT_BARTHELEMY("BL", "Saint Barthélemy"),
+        SAINT_BARTHELEMY("BL", "Saint Barthï¿½lemy"),
         BERMUDA("BM", "Bermuda"),
         BRUNEI("BN", "Brunei"),
         BOLIVIA("BO", "Bolivia"),
@@ -765,7 +757,7 @@ public class Metrics {
         CENTRAL_AFRICAN_REPUBLIC("CF", "Central African Republic"),
         CONGO("CG", "Congo"),
         SWITZERLAND("CH", "Switzerland"),
-        COTE_D_IVOIRE("CI", "Côte d'Ivoire"),
+        COTE_D_IVOIRE("CI", "Cï¿½te d'Ivoire"),
         COOK_ISLANDS("CK", "Cook Islands"),
         CHILE("CL", "Chile"),
         CAMEROON("CM", "Cameroon"),
@@ -774,7 +766,7 @@ public class Metrics {
         COSTA_RICA("CR", "Costa Rica"),
         CUBA("CU", "Cuba"),
         CAPE_VERDE("CV", "Cape Verde"),
-        CURACAO("CW", "Curaçao"),
+        CURACAO("CW", "Curaï¿½ao"),
         CHRISTMAS_ISLAND("CX", "Christmas Island"),
         CYPRUS("CY", "Cyprus"),
         CZECH_REPUBLIC("CZ", "Czech Republic"),
@@ -972,8 +964,8 @@ public class Metrics {
         ZAMBIA("ZM", "Zambia"),
         ZIMBABWE("ZW", "Zimbabwe");
 
-        private String isoTag;
-        private String name;
+        private final String isoTag;
+        private final String name;
 
         Country(String isoTag, String name) {
             this.isoTag = isoTag;

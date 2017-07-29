@@ -9,7 +9,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
 import com.earth2me.essentials.Essentials;
@@ -44,25 +42,25 @@ import net.milkbowl.vault.economy.Economy;
 public class Main extends JavaPlugin {
 
     public static Economy economy = null;
-    public static Utils utils = null;
-    public static int CFG_VERSION = 12;
+    private static Utils utils = null;
+    private static final int CFG_VERSION = 12;
     public static int PL_VERSION;
     public static YamlConfiguration finalconfig;
-    public static List<String> disabledWorlds;
-    public static HashMap<String, UUID> boundIPs = new HashMap<String, UUID>();
-    List<Payout> payouts = new ArrayList<Payout>();
-    HashMap<String, Double> payedMoney = new HashMap<String, Double>();
-    HashMap<UUID, Integer> onlineSeconds = new HashMap<UUID, Integer>();
-    HashMap<UUID, Location> lastLocation = new HashMap<UUID, Location>();
-    String message;
-    ConsoleCommandSender clogger = this.getServer().getConsoleSender();
-    int currentDay = 0;
-    boolean use18Features = true;
+    private static List<String> disabledWorlds;
+    private static final HashMap<String, UUID> boundIPs = new HashMap<>();
+    private final List<Payout> payouts = new ArrayList<>();
+    private HashMap<String, Double> payedMoney = new HashMap<>();
+    private final HashMap<UUID, Integer> onlineSeconds = new HashMap<>();
+    private final HashMap<UUID, Location> lastLocation = new HashMap<>();
+    private String message;
+    private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
+    private int currentDay = 0;
+    private boolean use18Features = true;
 
     @SuppressWarnings({"deprecation", "unchecked"})
     @Override
     public void onEnable() {
-        PL_VERSION = Integer.parseInt(((Plugin) this).getDescription().getVersion());
+        PL_VERSION = Integer.parseInt(this.getDescription().getVersion());
         this.getCommand("timeismoney").setExecutor(new Cmd(this));
 
         currentDay = (new Date()).getDay();
@@ -95,37 +93,33 @@ public class Main extends JavaPlugin {
         if (getConfig().getBoolean("enable_atm")) new ATM(this);
 
         final int seconds = getConfig().getInt("give_money_every_second");
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
-            public void run() {
-                try {
-                    for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (disabledWorlds.contains(p.getWorld().getName())) continue;
-                        if (!boundIPs.containsKey(p.getAddress().getHostName())) {
-                            boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
-                        }
-                        if (onlineSeconds.containsKey(p.getUniqueId())) {
-
-                            onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
-                        } else {
-                            onlineSeconds.put(p.getUniqueId(), 1);
-                        }
-                        if (onlineSeconds.get(p.getUniqueId()) > seconds) {
-                            pay(p);
-                            onlineSeconds.remove(p.getUniqueId());
-                        }
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            try {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (disabledWorlds.contains(p.getWorld().getName())) continue;
+                    if (!boundIPs.containsKey(p.getAddress().getHostName())) {
+                        boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
                     }
-                } catch (NullPointerException e) {
-                    //
+                    if (onlineSeconds.containsKey(p.getUniqueId())) {
+
+                        onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
+                    } else {
+                        onlineSeconds.put(p.getUniqueId(), 1);
+                    }
+                    if (onlineSeconds.get(p.getUniqueId()) > seconds) {
+                        pay(p);
+                        onlineSeconds.remove(p.getUniqueId());
+                    }
                 }
+            } catch (NullPointerException e) {
+                //
             }
         }, 20L, 20L);
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-            public void run() {
-                if (currentDay != new Date().getDay()) { //Next day, clear payouts!
-                    log("Cleared all payouts");
-                    payedMoney.clear();
-                    currentDay = new Date().getDay();
-                }
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            if (currentDay != new Date().getDay()) { //Next day, clear payouts!
+                log("Cleared all payouts");
+                payedMoney.clear();
+                currentDay = new Date().getDay();
             }
         }, 20L * 60, 20L * 60 * 15);
         setupEconomy();
@@ -139,7 +133,7 @@ public class Main extends JavaPlugin {
             payedMoney = (HashMap<String, Double>) ((HashMap<String, Double>) ois.readObject()).clone();
 
             ois.close();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
 
@@ -181,7 +175,7 @@ public class Main extends JavaPlugin {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(payedMoney);
             oos.close();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -196,7 +190,7 @@ public class Main extends JavaPlugin {
         //loadPayouts();
     }
 
-    public void loadPayouts() {
+    private void loadPayouts() {
         try {
             payouts.clear();
             for (String key : finalconfig.getConfigurationSection("payouts").getKeys(false)) {
@@ -221,7 +215,7 @@ public class Main extends JavaPlugin {
         }
     }
 
-    boolean setupEconomy() {
+    private boolean setupEconomy() {
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
         if (economyProvider != null) {
             economy = economyProvider.getProvider();
@@ -230,12 +224,12 @@ public class Main extends JavaPlugin {
         return (economy != null);
     }
 
-    public Payout getPayOutForPlayer(Player p) {
+    private Payout getPayOutForPlayer(Player p) {
         Payout finalpayout = null;
         if (!this.getConfig().getBoolean("choose-payout-by-chance")) {
             //by Permission
             for (Payout payout : payouts) {
-                if (payout.permission == "") finalpayout = payout;
+                if (payout.permission.equalsIgnoreCase("")) finalpayout = payout;
                 if (p.hasPermission(payout.permission)) {
                     finalpayout = payout;
                 }
@@ -243,7 +237,7 @@ public class Main extends JavaPlugin {
         } else {
             //by Chance
             Random rnd = new Random();
-            List<Payout> list = new ArrayList<Payout>();
+            List<Payout> list = new ArrayList<>();
             for (Payout payout : payouts) {
                 for (int i = 0; i < payout.chance; i++) list.add(payout);
             }
@@ -253,7 +247,7 @@ public class Main extends JavaPlugin {
     }
 
     @SuppressWarnings("deprecation")
-    public void pay(Player p) {
+    private void pay(Player p) {
         if (p == null) return;
 
         //REACHED MAX PAYOUT CHECK
@@ -349,19 +343,14 @@ public class Main extends JavaPlugin {
 
     }
 
-    public void dispatchCommandSync(final String cmd) {
+    private void dispatchCommandSync(final String cmd) {
         final Server server = this.getServer();
 
-        this.getServer().getScheduler().runTask(this, new Runnable() {
-
-            public void run() {
-                server.dispatchCommand(server.getConsoleSender(), cmd);
-            }
-        });
+        this.getServer().getScheduler().runTask(this, () -> server.dispatchCommand(server.getConsoleSender(), cmd));
     }
 
     @SuppressWarnings("deprecation")
-    public void log(String msg) {
+    private void log(String msg) {
         if (!this.getConfig().getBoolean("debug-log")) {
             return;
         }
@@ -373,13 +362,13 @@ public class Main extends JavaPlugin {
                 file.createNewFile();
             }
             FileReader pr = new FileReader(file);
-            int number = 0;
+            int number;
             StringBuffer text = new StringBuffer();
             while ((number = pr.read()) != -1) {
 
                 text.append((char) number);
             }
-            text.append(currentTimestamp.toGMTString() + ":" + msg + "\n");
+            text.append(currentTimestamp.toGMTString()).append(":").append(msg).append("\n");
             PrintWriter pw = new PrintWriter(file);
             pw.print(text);
 
@@ -389,13 +378,13 @@ public class Main extends JavaPlugin {
         }
     }
 
-    public void sendMessage(Player p, String msg) {
+    private void sendMessage(Player p, String msg) {
         if (msg == null) return;
         if (msg.length() == 0) return;
         p.sendMessage(msg.replace('&', '�'));
     }
 
-    public void sendActionbar(final Player p, final String msg) {
+    private void sendActionbar(final Player p, final String msg) {
         if (msg.length() == 0) return;
         int times = finalconfig.getInt("display-messages-in-actionbar-time");
         if (times == 1) {
@@ -408,11 +397,7 @@ public class Main extends JavaPlugin {
             }
             times--;
             for (int i = 0; i < times; i++) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-                    public void run() {
-                        utils.sendActionBarMessage(p, msg.replace('&', '�'));
-                    }
-                }, 20L * i);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> utils.sendActionBarMessage(p, msg.replace('&', '�')), 20L * i);
             }
         }
     }
@@ -434,7 +419,7 @@ public class Main extends JavaPlugin {
             commandMapField.setAccessible(true);
             SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(spmanager);
 
-            Field knownCommandsField = null;
+            Field knownCommandsField;
             Map<String, Command> knownCommands = null;
             if (commandMap != null) {
                 knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
@@ -454,7 +439,7 @@ public class Main extends JavaPlugin {
                     }
                     if (commandMap != null) {
                         for (it = knownCommands.entrySet().iterator(); it.hasNext(); ) {
-                            Map.Entry<String, Command> entry = (Map.Entry) it.next();
+                            Map.Entry<String, Command> entry = it.next();
                             if ((entry.getValue() instanceof PluginCommand)) {
                                 PluginCommand command = (PluginCommand) entry.getValue();
                                 if (command.getPlugin() == plugin1) {
