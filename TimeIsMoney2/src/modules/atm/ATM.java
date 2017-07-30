@@ -135,7 +135,7 @@ public class ATM implements Listener, CommandExecutor {
 				Sign sign = (Sign) e.getClickedBlock().getState();	
 				if(sign.getLine(0).equalsIgnoreCase(CC("&cATM"))){
 					if(!e.getPlayer().hasPermission("tim.atm.use")){
-						e.getPlayer().sendMessage(Main.finalconfig.getString("message_atm_noperms").replace('&', '�'));
+						e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_noperms")));
 					}else{
 						this.openGUI(e.getPlayer());
 					}
@@ -147,7 +147,7 @@ public class ATM implements Listener, CommandExecutor {
 	public void onMove(InventoryMoveItemEvent e){
 		if(e.getSource() == null) return;
 		if(e.getSource().getTitle() == null) return;
-		if(e.getSource().getTitle().equals(Main.finalconfig.getString("atm_title").replace('&', '�'))){
+		if(e.getSource().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
 			e.setCancelled(true);
 		}
 	}
@@ -202,7 +202,7 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	private void openGUI(Player player) {
 		convertOldBank(player);
-		Inventory atm_gui = Bukkit.createInventory(null, 9, Main.finalconfig.getString("atm_title").replace('&', '�'));
+		Inventory atm_gui = Bukkit.createInventory(null, 9, CC(Main.finalconfig.getString("atm_title")));
 		
 		//
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
@@ -293,12 +293,12 @@ public class ATM implements Listener, CommandExecutor {
                     Sign sign = (Sign) e.getBlock().getState();
                     if(sign.getLine(0).equalsIgnoreCase("[atm]")){
                         if(!e.getPlayer().hasPermission("tim.atm.place")){
-                            e.getPlayer().sendMessage("�cYou dont have permissions to build ATM's!");
+                            e.getPlayer().sendMessage(CC("&cYou dont have permissions to build ATM's!"));
                             sign.setLine(0, "");
                         }else{
-                            sign.setLine(0, "�cATM");
+                            sign.setLine(0, CC("&cATM"));
                             sign.update();
-                            e.getPlayer().sendMessage("�2ATM created! (You can also write something in the Lins 2-4)");
+                            e.getPlayer().sendMessage(CC("&2ATM created! (You can also write something in the Lins 2-4)"));
                         }
                     }
                 }
