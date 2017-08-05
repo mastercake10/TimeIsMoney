@@ -298,7 +298,7 @@ public class ATM implements Listener, CommandExecutor {
                         }else{
                             sign.setLine(0, CC("&cATM"));
                             sign.update();
-                            e.getPlayer().sendMessage(CC("&2ATM created! (You can also write something in the Lins 2-4)"));
+                            e.getPlayer().sendMessage(CC("&2ATM created! (You can also write something in the Lines 2-4)"));
                         }
                     }
                 }
