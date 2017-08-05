@@ -22,7 +22,7 @@ allow-multiple-accounts: true
 choose-payout-by-chance: false
 
 # You can add as many payouts you want. You only can choose between "permission"
-# and "change", not both.
+# and "chance", not both.
 payouts:
   1:
     payout_amount: 50
