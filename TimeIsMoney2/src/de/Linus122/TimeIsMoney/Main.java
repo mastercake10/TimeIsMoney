@@ -150,9 +150,8 @@ public class Main extends JavaPlugin {
         try {
             final Class<?> clazz = Class.forName(Bukkitversion + ".NBTUtils");
             // Check if we have a NMSHandler class at that location.
-            if (Utils.class.isAssignableFrom(clazz)) { // Make sure it actually implements NMS
+            if (ActionBarUtils.class.isAssignableFrom(clazz)) { // Make sure it actually implements NMS
                 actionBarUtils = (ActionBarUtils) clazz.getConstructor().newInstance(); // Set our handler
-
             }
 
         } catch (final Exception e) {
