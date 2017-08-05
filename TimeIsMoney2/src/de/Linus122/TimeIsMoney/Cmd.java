@@ -4,9 +4,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class Cmd implements CommandExecutor {
-	Main main;
-	public Cmd(Main main) {
+import static de.Linus122.TimeIsMoney.Utils.CC;
+
+class Cmd implements CommandExecutor {
+	private final Main main;
+	Cmd(Main main) {
 		this.main = main;
 	}
 
@@ -14,7 +16,7 @@ public class Cmd implements CommandExecutor {
 	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] arg3) {
 		if(cs.hasPermission("tim.reload")){
 			main.reload();
-			cs.sendMessage("§aTime is Money §cv" + main.PL_VERSION + " §areloaded!");
+			cs.sendMessage(CC("&aTime is Money &cv" + Main.PL_VERSION + " &areloaded!"));
 			
 		}
 		return true;

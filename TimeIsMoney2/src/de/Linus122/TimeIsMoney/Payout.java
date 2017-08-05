@@ -8,5 +8,5 @@ public class Payout {
 	double max_payout_per_day = 0;
 	String permission = "";
 	int chance = 0;
-	List<String> commands = new ArrayList<String>();
+	List<String> commands = new ArrayList<>();
 }

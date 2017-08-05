@@ -1,18 +1,19 @@
 package v1_8_R1;
 
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
-import org.bukkit.entity.Player;
-
-import de.Linus122.TimeIsMoney.Utils;
+import de.Linus122.TimeIsMoney.ActionBarUtils;
 import net.minecraft.server.v1_8_R1.ChatSerializer;
 import net.minecraft.server.v1_8_R1.IChatBaseComponent;
 import net.minecraft.server.v1_8_R1.PacketPlayOutChat;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 
-public class NBTUtils implements Utils{
+import static de.Linus122.TimeIsMoney.Utils.CC;
+
+public class NBTUtils implements ActionBarUtils {
   @Override
   public void sendActionBarMessage(Player p, String message)
   {
-	    IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + message.replace('&', '§') + "\"}");
+	    IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + CC(message) + "\"}");
 	    PacketPlayOutChat bar = new PacketPlayOutChat(icbc, (byte)2);
 	    ((CraftPlayer)p).getHandle().playerConnection.sendPacket(bar);
   }
