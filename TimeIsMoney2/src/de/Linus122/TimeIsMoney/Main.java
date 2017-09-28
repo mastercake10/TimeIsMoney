@@ -164,7 +164,7 @@ public class Main extends JavaPlugin {
             clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
         }
         new Metrics(this);
-
+        
         clogger.sendMessage(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
     }
 
