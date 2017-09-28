@@ -25,7 +25,7 @@ public class Metrics {
 				sendData(dataJson);
 			}catch(Exception e){
 				// skip
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}, 20L * 5, 20L * 60 * 10);
 	}
