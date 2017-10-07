@@ -1,4 +1,4 @@
-package modules.atm;
+package de.Linus122.TimeIsMoney;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +29,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import com.google.common.primitives.Doubles;
-
-import de.Linus122.TimeIsMoney.Main;
 
 import static de.Linus122.TimeIsMoney.Utils.CC;
 

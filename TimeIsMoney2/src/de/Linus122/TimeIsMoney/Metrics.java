@@ -19,7 +19,7 @@ import com.google.gson.Gson;
 
 /*
  * SpaceIOMetrics main class by Linus122
- * version: 0.02
+ * version: 0.03
  * 
  */
 public class Metrics {
@@ -27,6 +27,8 @@ public class Metrics {
 	private final Gson gson = new Gson();
 	
 	private String URL = "https://spaceio.de/update/%s";
+	private final String VERSION = "0.03";
+	private int REFRESH_INTERVAL = 600000;
 	
 	public Metrics(Plugin pl){
 		this.pl = pl;
@@ -43,19 +45,27 @@ public class Metrics {
 		}
 
 		URL = String.format(URL, pl.getName());
+		
+		// fetching refresh interval first
+		pl.getServer().getScheduler().runTaskLaterAsynchronously(pl, () -> {
+			String dataJson = collectData();
+			try{
+				REFRESH_INTERVAL = sendData(dataJson);
+			}catch(Exception e){}
+		}, 20L * 5);
+		
+		// executing repeating task, our main metrics updater
 		pl.getServer().getScheduler().runTaskTimerAsynchronously(pl, () -> {
 			String dataJson = collectData();
 			try{
 				sendData(dataJson);
-			}catch(Exception e){
-				// skip
-				//e.printStackTrace();
-			}
-		}, 20L * 5, 20L * 60 * 10);
+			}catch(Exception e){}
+			
+		}, 20L * (REFRESH_INTERVAL / 1000), 20L * (REFRESH_INTERVAL / 1000));
 	}
 	private String collectData() {
 		Data data = new Data();
-
+		
 		// collect plugin list
 		for(Plugin plug : pl.getServer().getPluginManager().getPlugins()) data.plugs.put(plug.getName(), plug.getDescription().getVersion());
 		
@@ -93,19 +103,21 @@ public class Metrics {
 		
 		return gson.toJson(data);
 	}
-	private void sendData(String dataJson) throws Exception{
+	private int sendData(String dataJson) throws Exception{
 		java.net.URL obj = new java.net.URL(URL);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
 		con.setRequestMethod("POST");
 		con.setRequestProperty("User-Agent", "Java/Bukkit");
+		con.setRequestProperty("Metrics-Version", this.VERSION);
 
 		con.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
 		wr.writeBytes(dataJson);
 		wr.flush();
 		wr.close();
-		con.getResponseCode();
+		
+		return Integer.parseInt(con.getHeaderField("interval-millis"));
 	}
 	private String getVersion(){
         String packageName = pl.getServer().getClass().getPackage().getName();
@@ -132,15 +144,13 @@ public class Metrics {
         //prints first version-related file
         for (File f : fileList) {
             try {
-                BufferedReader myReader = new BufferedReader(new FileReader(f));
+                BufferedReader br = new BufferedReader(new FileReader(f));
                 String strLine = null;
-                while ((strLine = myReader.readLine()) != null) {
+                while ((strLine = br.readLine()) != null) {
                     return strLine;
                 }
-                myReader.close();
-            } catch (Exception e) {
-                
-            }
+                br.close();
+            } catch (Exception e) {}
         }
 		return "unknown";    
 	}

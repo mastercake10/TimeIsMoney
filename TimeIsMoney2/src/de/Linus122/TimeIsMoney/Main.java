@@ -36,17 +36,14 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import modules.atm.ATM;
-import net.milkbowl.vault.economy.Economy;
-
 import static de.Linus122.TimeIsMoney.Utils.CC;
 
 public class Main extends JavaPlugin {
 
-    public static Economy economy = null;
+    public static net.milkbowl.vault.economy.Economy economy = null;
     private static ActionBarUtils actionBarUtils = null;
     private static final int CFG_VERSION = 12;
-    public static int PL_VERSION;
+    public static String PL_VERSION;
     public static YamlConfiguration finalconfig;
     private static List<String> disabledWorlds;
     private static final HashMap<String, UUID> boundIPs = new HashMap<>();
@@ -55,6 +52,7 @@ public class Main extends JavaPlugin {
     private final HashMap<UUID, Integer> onlineSeconds = new HashMap<>();
     private final HashMap<UUID, Location> lastLocation = new HashMap<>();
     private String message;
+    private String messageActionbar;
     private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
     private int currentDay = 0;
     private boolean use18Features = true;
@@ -62,9 +60,8 @@ public class Main extends JavaPlugin {
     @SuppressWarnings({"deprecation", "unchecked"})
     @Override
     public void onEnable() {
-        PL_VERSION = Integer.parseInt(this.getDescription().getVersion());
         this.getCommand("timeismoney").setExecutor(new Cmd(this));
-
+        PL_VERSION = this.getDescription().getVersion();
         currentDay = (new Date()).getDay();
 
         File config = new File("plugins/TimeIsMoney/config.yml");
@@ -128,6 +125,8 @@ public class Main extends JavaPlugin {
 
         message = finalconfig.getString("message");
         message = CC(message);
+        messageActionbar = finalconfig.getString("message_actionbar");
+        messageActionbar = CC(messageActionbar);
 
         try {
             FileInputStream fis = new FileInputStream(new File("plugins/TimeIsMoney/payed_today.data"));
@@ -217,7 +216,7 @@ public class Main extends JavaPlugin {
     }
 
     private boolean setupEconomy() {
-        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        RegisteredServiceProvider<net.milkbowl.vault.economy.Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
         if (economyProvider != null) {
             economy = economyProvider.getProvider();
         }
@@ -327,7 +326,7 @@ public class Main extends JavaPlugin {
             sendMessage(p, message.replace("%money%", economy.format(payout.payout_amount)));
         }
         if (finalconfig.getBoolean("display-messages-in-actionbar") && use18Features) {
-            sendActionbar(p, message.replace("%money%", economy.format(payout.payout_amount)));
+            sendActionbar(p, messageActionbar.replace("%money%", economy.format(payout.payout_amount)));
         }
         for (String cmd : payout.commands) {
             dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
