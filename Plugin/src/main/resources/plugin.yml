@@ -1,0 +1,54 @@
+name: TimeIsMoney
+version: 1.9.6.1
+description: Gives money for online time
+author: Linus122
+website: "https://www.spigotmc.org/resources/time-is-money.12409/"
+main: Main
+
+depend: [Vault]
+softdepend: [Essentials]
+
+commands:
+  timeismoney:
+    description: Reloads the config
+    aliases: tim
+    usage: /<command>
+    permission: tim.reload
+  atm:
+    description: Opens the atm
+    usage: /<command>
+    permission: tim.use
+
+permissions:
+  tim.*:
+    description: Allows you to use all of the TimeIsMoney commands and features
+    children:
+      tim.reload: true
+      tim.admin: true
+      tim.use: true
+      tim.afkbypass: true
+      tim.atm.*: true
+  tim.reload:
+    description: Allows you to reload the config
+    default: op
+  tim.admin:
+    description: Allows you to open the atm of another player
+    default: op
+  tim.use:
+    description: Allows you to open the atm
+    default: op
+  tim.afkbypass:
+    description: Allows you to get paid while afk
+    default: op
+  tim.atm.*:
+    description: Allows you to create and use atm signs
+    default: op
+    children:
+      tim.atm.place: true
+      tim.atm.use: true
+  tim.atm.place:
+    description: Allows you to create atm signs
+    default: op
+  tim.atm.use:
+    description: Allows you to use atm signs
+    default: op

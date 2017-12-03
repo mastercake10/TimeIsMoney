@@ -1,0 +1,84 @@
+configuration-version: 12
+
+debug-log: false
+
+# You can disable the plugin's payout feature in certain worlds
+disabled_in_worlds:
+- "creative_world"
+
+# You can define if the player gets a payout whether player is afk or not.
+# the permission tim.afkbypass would avoid this for certain user or groups.
+afk_payout: false
+display-messages-in-chat: true
+display-messages-in-actionbar: true
+display-messages-in-actionbar-time: 10
+give_money_every_second: 600
+store-money-in-bank: false
+
+# Define if multiple accounts should get payed with the same ip-address. You may disable this if your players are using multiple accounts per ip.
+allow-multiple-accounts: true
+
+# Payouts will be delivered by "chance" instead "permission".
+choose-payout-by-chance: false
+
+# You can add as many payouts you want. You only can choose between "permission"
+# and "chance", not both.
+payouts:
+  1:
+    payout_amount: 50
+    max_payout_per_day: 1000
+    # chance: 10
+    permission:
+  2:
+    payout_amount: 100
+    max_payout_per_day: 10000
+    commands:
+      - /give %player% diamond 1
+    # chance: 90
+    # You can use any permission name you want. e.g. myserver.donor
+    permission: tim.vip
+
+# Translations
+message: "&aYou earned &c%money% &afor 10 minutes online time!"
+message_payoutlimit_reached: "&cYou have reached the payout limit today. You earned 0$"
+message_afk: "&cYou havn't earned money because you were afk!"
+message_multiple_ips: "&cYou havn't earned money because you're playing with multiple accounts!"
+message_actionbar: "&aYou earned &c%money% &afor 10 minutes online time!"
+message_payoutlimit_reached_actionbar: "&cYou have reached the payout limit today. You got 0$"
+message_afk_actionbar: "&cYou haven't earned money because you were afk!"
+message_atm_noperms: "&cYou don't have the permission to use ATM's!"
+message_atm_nomoneyinbank: "&cYou don't have enough money in bank!"
+message_atm_nomoney: "&cYou don't have enough money!"
+
+# ATM -> Place down a sign with [atm] on the first line to use it!
+enable_atm: true
+atm_title: "&cATM"
+atm_withdraw: "&cWithdraw"
+atm_deposit: "&cDeposit"
+atm_balance: "&cBank balance:"
+atm_worth_gradation:
+  - 10.0
+  - 100.0
+  - 1000.0
+  - 10000.0
+
+
+# You can seperate the ATM balances for different worlds by group them. Just set group-atms to true and write atm_groups as described below.
+# Note: Existing bank accounts will be removed when enabling this feature. 
+group-atms: false
+# Example groups for seperating all worlds:
+#atm_groups:
+#  group1:
+#  - world
+#  group2:
+#  - world_nether
+#  group3:
+#   - world_the_end
+# Example groups for seperating skyblock worlds and survival worlds:
+#atm_groups:
+#  group1:
+#  - ASkyblock_world
+#  - Askyblock_spawn
+#  group2:
+#  - survival_world
+#  - farm_world
