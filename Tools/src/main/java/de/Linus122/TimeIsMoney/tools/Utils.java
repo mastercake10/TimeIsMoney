@@ -2,16 +2,25 @@ package de.Linus122.TimeIsMoney.tools;
 
 import org.bukkit.ChatColor;
 
+/**
+ * Utility class.
+ *
+ * @author Linus122
+ * @since 1.9.6.1
+ */
 public class Utils {
-	
+	/**
+	 * @throws RuntimeException utils class should not be instantiated.
+	 */
 	public Utils() {
 		throw new RuntimeException("Utils class should not be instantiated!");
 	}
 	
 	/**
-	 * Utility method which converts &<color> bukkit colors to real bukkit colors which correct symbol
-	 * @param s string to convert
-	 * @return converted string
+	 * Converts &color to {@link org.bukkit.ChatColor}.
+	 *
+	 * @param s The string to convert to {@link org.bukkit.ChatColor}.
+	 * @return The converted string with {@link org.bukkit.ChatColor}.
 	 */
 	public static String CC(String s) {
 		return ChatColor.translateAlternateColorCodes('&', s);

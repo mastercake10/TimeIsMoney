@@ -9,11 +9,20 @@ import org.bukkit.entity.Player;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
-public class NBTUtils implements ActionBarUtils{
-  public void sendActionBarMessage(Player p, String message)
-  {
-	    IChatBaseComponent icbc = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + CC(message)  + "\"}");
-	    PacketPlayOutChat bar = new PacketPlayOutChat(icbc, ChatMessageType.GAME_INFO);
-	    ((CraftPlayer)p).getHandle().playerConnection.sendPacket(bar);
-  }
+/**
+ * NBT Utils for v1_12_R1.
+ *
+ * @author Linus122
+ * @since 1.9.6.1
+ */
+public class NBTUtils implements ActionBarUtils {
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendActionBarMessage(Player p, String message) {
+		IChatBaseComponent icbc = IChatBaseComponent.ChatSerializer.a("{\"text\": \"" + CC(message) + "\"}");
+		PacketPlayOutChat bar = new PacketPlayOutChat(icbc, ChatMessageType.GAME_INFO);
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket(bar);
+	}
 }
