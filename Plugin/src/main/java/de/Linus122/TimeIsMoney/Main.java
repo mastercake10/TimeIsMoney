@@ -142,7 +142,6 @@ public class Main extends JavaPlugin {
 			this.saveDefaultConfig();
 		}
 		
-		
 		finalconfig = YamlConfiguration.loadConfiguration(config);
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
 		
@@ -191,11 +190,9 @@ public class Main extends JavaPlugin {
 			
 			ois.close();
 		} catch (Exception ignored) {
-		
 		}
 		
 		loadPayouts();
-		
 		
 		String packageName = this.getServer().getClass().getPackage().getName();
 		// Get full package string of CraftServer.
@@ -208,7 +205,6 @@ public class Main extends JavaPlugin {
 			if (ActionBarUtils.class.isAssignableFrom(clazz)) { // Make sure it actually implements NMS
 				actionBarUtils = (ActionBarUtils) clazz.getConstructor().newInstance(); // Set our handler
 			}
-			
 		} catch (final Exception e) {
 			this.getLogger().severe("Actionbars are not supported on your spigot version, sorry.");
 			useActionbars = false;
