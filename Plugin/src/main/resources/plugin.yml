@@ -1,9 +1,9 @@
 name: TimeIsMoney
-version: 1.9.6.1
+version: 1.9.6.2
 description: Gives money for online time
 author: Linus122
 website: "https://www.spigotmc.org/resources/time-is-money.12409/"
-main: Main
+main: de.Linus122.TimeIsMoney.Main
 
 depend: [Vault]
 softdepend: [Essentials]

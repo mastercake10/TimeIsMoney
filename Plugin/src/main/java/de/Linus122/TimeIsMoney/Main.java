@@ -16,6 +16,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -120,7 +121,7 @@ public class Main extends JavaPlugin {
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
 		currentDay = (new Date()).getDay();
-		
+		this.reloadConfig();
 		File config = new File("plugins/TimeIsMoney/config.yml");
 		if (config.exists()) {
 			YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);
@@ -161,7 +162,7 @@ public class Main extends JavaPlugin {
 					} else {
 						onlineSeconds.put(p.getUniqueId(), 1);
 					}
-					if (onlineSeconds.get(p.getUniqueId()) > seconds) {
+					if (onlineSeconds.get(p.getUniqueId()) >= seconds) {
 						pay(p);
 						onlineSeconds.remove(p.getUniqueId());
 					}
@@ -233,18 +234,19 @@ public class Main extends JavaPlugin {
 		} catch (Exception ignored) {
 		}
 	}
-	
+
 	/**
 	 * Reloads TimeIsMoney.
 	 */
 	void reload() {
-		//File config = new File("plugins/TimeIsMoney/config.yml");
-		//finalconfig = YamlConfiguration.loadConfiguration(config);
+	    // cancelling current tasks
+        for (BukkitWorker bw: Bukkit.getScheduler().getActiveWorkers()) {
+            if (bw.getOwner() == this) {
+                Bukkit.getScheduler().cancelTask(bw.getTaskId());
+            }
+        }
 		Bukkit.getPluginManager().disablePlugin(this);
 		Bukkit.getPluginManager().enablePlugin(this);
-		//this.onDisable();
-		//this.onEnable();
-		//loadPayouts();
 	}
 	
 	/**
