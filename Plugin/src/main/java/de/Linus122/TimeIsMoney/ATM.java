@@ -238,7 +238,6 @@ public class ATM implements Listener, CommandExecutor {
 				if (e.getCurrentItem() != null) {
 					// left side
 					if (e.getSlot() < 4) {
-						
 						double amount = worths[3 - e.getSlot()];
 						
 						if (ATM.bankHas(p, amount)) {
@@ -248,7 +247,7 @@ public class ATM implements Listener, CommandExecutor {
 						} else {
 							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
 						}
-					} else
+					} else {
 						// right side
 						if (e.getSlot() > 4) {
 							double amount = worths[3 - (3 - (e.getSlot() - 5))];
@@ -261,11 +260,12 @@ public class ATM implements Listener, CommandExecutor {
 								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
 							}
 						}
-					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
-					ItemMeta im = is.getItemMeta();
-					im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
-					is.setItemMeta(im);
-					e.getInventory().setItem(4, is);
+						ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
+						ItemMeta im = is.getItemMeta();
+						im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
+						is.setItemMeta(im);
+						e.getInventory().setItem(4, is);
+					}
 				}
 			}
 		} catch (Exception ignored) {
@@ -281,43 +281,39 @@ public class ATM implements Listener, CommandExecutor {
 		convertOldBank(player);
 		Inventory atm_gui = Bukkit.createInventory(null, 9, CC(Main.finalconfig.getString("atm_title")));
 		
-		//
+		// Balance
 		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(player)));
 		is.setItemMeta(im);
 		atm_gui.setItem(4, is);
 		
-		//
+		// Withdraw
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
 		atm_gui.setItem(3, is);
 		
-		//
 		is = new ItemStack(Material.IRON_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[1]));
 		is.setItemMeta(im);
 		atm_gui.setItem(2, is);
 		
-		//
 		is = new ItemStack(Material.GOLD_INGOT, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[2]));
 		is.setItemMeta(im);
 		atm_gui.setItem(1, is);
 		
-		//
 		is = new ItemStack(Material.DIAMOND, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[3]));
 		is.setItemMeta(im);
 		atm_gui.setItem(0, is);
 		
-		// DEPOSIT
-		//
+		// Deposit
 		is = new ItemStack(Material.CLAY_BRICK, 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[0]));
