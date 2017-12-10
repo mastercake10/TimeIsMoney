@@ -378,7 +378,7 @@ public class ATM implements Listener, CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] args) {
-		if (!(cs instanceof Player)){
+		if (!(cs instanceof Player)) {
 			cs.sendMessage("Only players can use atms.");
 			return true;
 		}
