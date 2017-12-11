@@ -2,6 +2,8 @@
 [![discord](https://discordapp.com/api/guilds/330725294749122561/widget.png)](https://discord.gg/3xgsPh8)
 [![view on SpigotMC](https://img.shields.io/badge/view%20on-spigotmc-orange.svg)](https://www.spigotmc.org/resources/time-is-money.12409/)
 
+![resource icon](https://www.spigotmc.org/data/resource_icons/12/12409.jpg?1442674788)
+
 ## Welcome to the TimeIsMoney GitHub repository!
 TimeIsMoney is a Spigot plugin compatible with Spigot versions 1.7 through 1.12.2, that gives players money for their time online!
 
