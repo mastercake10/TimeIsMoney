@@ -1,5 +1,5 @@
 name: TimeIsMoney
-version: 1.9.6.2
+version: ${project.version}
 description: Gives money for online time
 author: Linus122
 website: "https://www.spigotmc.org/resources/time-is-money.12409/"

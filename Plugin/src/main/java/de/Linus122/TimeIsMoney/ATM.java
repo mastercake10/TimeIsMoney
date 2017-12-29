@@ -278,6 +278,10 @@ public class ATM implements Listener, CommandExecutor {
 	 * @param player The player to open the atm gui for.
 	 */
 	private void openGUI(Player player) {
+		if(worths.length == 0) {
+			player.sendMessage("§cError in config.yml: atm_worth_gradation is empty.");
+			return;
+		}
 		convertOldBank(player);
 		Inventory atm_gui = Bukkit.createInventory(null, 9, CC(Main.finalconfig.getString("atm_title")));
 		

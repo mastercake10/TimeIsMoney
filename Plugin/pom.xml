@@ -7,7 +7,7 @@
     <parent>
         <groupId>de.Linus122.TimeIsMoney</groupId>
         <artifactId>parent</artifactId>
-        <version>1.9.6.1</version>
+        <version>1.9.6.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -83,47 +83,47 @@
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>Tools</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_8_R1</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_8_R2</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_8_R3</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_9_R1</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_9_R2</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_10_R1</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_11_R1</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
         <dependency>
             <groupId>de.Linus122.TimeIsMoney</groupId>
             <artifactId>v1_12_R1</artifactId>
-            <version>1.9.6.1</version>
+            <version>1.9.6.3</version>
         </dependency>
     </dependencies>
 </project>
