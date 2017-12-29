@@ -2,11 +2,13 @@
 [![discord](https://discordapp.com/api/guilds/330725294749122561/widget.png)](https://discord.gg/3xgsPh8)
 [![view on SpigotMC](https://img.shields.io/badge/view%20on-spigotmc-orange.svg)](https://www.spigotmc.org/resources/time-is-money.12409/)
 
+![resource icon](https://www.spigotmc.org/data/resource_icons/12/12409.jpg?1442674788)
+
 ## Welcome to the TimeIsMoney GitHub repository!
 TimeIsMoney is a Spigot plugin compatible with Spigot versions 1.7 through 1.12.2, that gives players money for their time online!
 
 In order for everyone to have the best experience possible, we have a few guidelines that everyone must follow.    
-- For all things on GitHub, please make sure you follow the [code of conduct](https://github.com/mastercake10/TimeIsMoney/blob/master/CODE_OF_CONDUCT.md).  
-- When creating an issue, please make sure you're using the [issue template](https://github.com/mastercake10/TimeIsMoney/blob/master/ISSUE_TEMPLATE.md).  
-- When submitting a pull request, please make sure you're using the [pull request template](https://github.com/mastercake10/TimeIsMoney/blob/master/PULL_REQUEST_TEMPLATE.md).
-- When contributing, please make sure you check out the [contribution guidelines](https://github.com/mastercake10/TimeIsMoney/blob/master/CONTRIBUTING.md).  
+- For all things on GitHub, please make sure you follow the [code of conduct](CODE_OF_CONDUCT.md).  
+- When creating an issue, please make sure you're using the [issue template](ISSUE_TEMPLATE.md).  
+- When submitting a pull request, please make sure you're using the [pull request template](PULL_REQUEST_TEMPLATE.md).
+- When contributing, please make sure you check out the [contribution guidelines](CONTRIBUTING.md).  
