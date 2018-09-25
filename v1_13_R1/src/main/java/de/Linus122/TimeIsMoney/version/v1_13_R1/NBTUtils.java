@@ -1,4 +1,4 @@
-package main.java.de.Linus122.TimeIsMoney.version.v1_13_R1;
+package de.Linus122.TimeIsMoney.version.v1_13_R1;
 
 import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
 import net.minecraft.server.v1_13_R1.ChatMessageType;
