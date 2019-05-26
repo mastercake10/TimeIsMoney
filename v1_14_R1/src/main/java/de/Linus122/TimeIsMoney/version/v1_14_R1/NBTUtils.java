@@ -10,10 +10,10 @@ import org.bukkit.entity.Player;
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
 /**
- * NBT Utils for v1_13_R1.
+ * NBT Utils for v1_14_R1.
  *
  * @author Linus122
- * @since 1.9.6.4
+ * @since 1.9.6.6
  */
 public class NBTUtils implements ActionBarUtils {
 	/**
