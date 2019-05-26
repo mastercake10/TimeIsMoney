@@ -23,6 +23,10 @@ public class Utils {
 	 * @return The converted string with {@link org.bukkit.ChatColor}.
 	 */
 	public static String CC(String s) {
+		// return an empty string if given string is null
+		if(s != null) {
+			return "";
+		}
 		return ChatColor.translateAlternateColorCodes('&', s);
 	}
 }
