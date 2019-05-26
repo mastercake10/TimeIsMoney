@@ -202,7 +202,7 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
-			if (e.getClickedBlock().getType() == Material.WALL_SIGN || e.getClickedBlock().getType() == Material.SIGN || e.getClickedBlock().getType() == Material.SIGN_POST) {
+			if (e.getClickedBlock().getType() == Material.getMaterial("WALL_SIGN") || e.getClickedBlock().getType() == Material.getMaterial("SIGN") || e.getClickedBlock().getType() == Material.getMaterial("SIGN_POST")) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equalsIgnoreCase(CC("&cATM"))) {
 					if (!e.getPlayer().hasPermission("tim.atm.use")) {
@@ -218,8 +218,8 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onMove(InventoryMoveItemEvent e) {
 		if (e.getSource() == null) return;
-		if (e.getSource().getTitle() == null) return;
-		if (e.getSource().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle() == null) return;
+		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
 			e.setCancelled(true);
 		}
 	}
@@ -230,8 +230,8 @@ public class ATM implements Listener, CommandExecutor {
 		try {
 			if (e == null) return;
 			if (e.getInventory() == null) return;
-			if (e.getInventory().getTitle() == null) return;
-			if (e.getInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+			if (e.getView().getTitle() == null) return;
+			if (e.getView().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
 				e.setResult(Result.DENY);
 				Player p = (Player) e.getWhoClicked();
 				//e.setCancelled(true);
@@ -293,7 +293,7 @@ public class ATM implements Listener, CommandExecutor {
 		atm_gui.setItem(4, is);
 		
 		// Withdraw
-		is = new ItemStack(Material.CLAY_BRICK, 1);
+		is = new ItemStack(Material.getMaterial("CLAY_BRICK"), 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
@@ -318,7 +318,7 @@ public class ATM implements Listener, CommandExecutor {
 		atm_gui.setItem(0, is);
 		
 		// Deposit
-		is = new ItemStack(Material.CLAY_BRICK, 1);
+		is = new ItemStack(Material.getMaterial("CLAY_BRICK"), 1);
 		im = is.getItemMeta();
 		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[0]));
 		is.setItemMeta(im);
@@ -352,8 +352,8 @@ public class ATM implements Listener, CommandExecutor {
 	public void onInventoryDrag(InventoryDragEvent e) {
 		if (e == null) return;
 		if (e.getInventory() == null) return;
-		if (e.getInventory().getTitle() == null) return;
-		if (e.getInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+		if (e.getView().getTitle() == null) return;
+		if (e.getView().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
 			e.setResult(Result.DENY);
 		}
 	}
@@ -361,9 +361,9 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onSignChange(final SignChangeEvent e) {
 		final Block b = e.getBlock();
-		if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST) {
+		if (b.getType() == Material.getMaterial("WALL_SIGN") || b.getType() == Material.getMaterial("SIGN") || b.getType() == Material.getMaterial("SIGN_POST")) {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-				if (b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST) {
+				if (b.getType() == Material.getMaterial("WALL_SIGN") || b.getType() == Material.getMaterial("SIGN") || b.getType() == Material.getMaterial("SIGN_POST")) {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[atm]")) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {

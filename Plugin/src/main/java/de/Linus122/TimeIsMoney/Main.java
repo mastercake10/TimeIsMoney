@@ -149,7 +149,7 @@ public class Main extends JavaPlugin {
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
 		
 		final int seconds = getConfig().getInt("give_money_every_second");
-		Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+		Bukkit.getScheduler().runTaskTimer(this, () -> {
 			try {
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					if (disabledWorlds.contains(p.getWorld().getName())) continue;
