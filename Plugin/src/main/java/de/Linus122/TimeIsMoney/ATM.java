@@ -202,7 +202,7 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
-			if (e.getClickedBlock().getType() == Material.getMaterial("WALL_SIGN") || e.getClickedBlock().getType() == Material.getMaterial("SIGN") || e.getClickedBlock().getType() == Material.getMaterial("SIGN_POST")) {
+			if (e.getClickedBlock().getType().name().contains("SIGN")) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equalsIgnoreCase(CC("&cATM"))) {
 					if (!e.getPlayer().hasPermission("tim.atm.use")) {
@@ -217,7 +217,7 @@ public class ATM implements Listener, CommandExecutor {
 	
 	@EventHandler
 	public void onMove(InventoryMoveItemEvent e) {
-		if (e.getSource() == null) return;
+		if (e.getSource() == null || e.getSource().getViewers().size() == 0 || e.getSource().getViewers().get(0).getOpenInventory() == null) return;
 		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle() == null) return;
 		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
 			e.setCancelled(true);
@@ -361,9 +361,9 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onSignChange(final SignChangeEvent e) {
 		final Block b = e.getBlock();
-		if (b.getType() == Material.getMaterial("WALL_SIGN") || b.getType() == Material.getMaterial("SIGN") || b.getType() == Material.getMaterial("SIGN_POST")) {
+		if (b.getType().name().contains("SIGN")) {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-				if (b.getType() == Material.getMaterial("WALL_SIGN") || b.getType() == Material.getMaterial("SIGN") || b.getType() == Material.getMaterial("SIGN_POST")) {
+				if (b.getType().name().contains("SIGN")) {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[atm]")) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
