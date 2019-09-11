@@ -361,9 +361,9 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onSignChange(final SignChangeEvent e) {
 		final Block b = e.getBlock();
-		if (b.getType().name().contains("SIGN")) {
+		if (b.getState() instanceof Sign) {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-				if (b.getType().name().contains("SIGN")) {
+				if (b.getState() instanceof Sign) {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[atm]")) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
