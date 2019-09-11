@@ -153,8 +153,9 @@ public class Main extends JavaPlugin {
 			try {
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					if (disabledWorlds.contains(p.getWorld().getName())) continue;
-					if (!boundIPs.containsKey(p.getAddress().getHostName())) {
-						boundIPs.put(p.getAddress().getHostName(), p.getUniqueId());
+
+					if (!boundIPs.containsKey(p.getAddress().getHostString())) {
+						boundIPs.put(p.getAddress().getHostString(), p.getUniqueId());
 					}
 					if (onlineSeconds.containsKey(p.getUniqueId())) {
 						
@@ -348,8 +349,8 @@ public class Main extends JavaPlugin {
 		}
 		
 		if (!finalconfig.getBoolean("allow-multiple-accounts")) {
-			if (boundIPs.containsKey(p.getAddress().getHostName())) {
-				if (!boundIPs.get(p.getAddress().getHostName()).equals(p.getUniqueId())) {
+			if (boundIPs.containsKey(p.getAddress().getHostString())) {
+				if (!boundIPs.get(p.getAddress().getHostString()).equals(p.getUniqueId())) {
 					sendMessage(p, finalconfig.getString("message_multiple_ips"));
 					return;
 				}
