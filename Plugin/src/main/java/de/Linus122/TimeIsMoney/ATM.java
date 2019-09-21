@@ -186,23 +186,12 @@ public class ATM implements Listener, CommandExecutor {
 			}
 		}
 		return p.getName() + "_TimBANK";
-		/*if(!Main.finalconfig.getBoolean("group-atms")){
-			return p.getName() + "_TimBANK";
-		}else{
-			for(String key : Main.finalconfig.getConfigurationSection("atm_groups").getKeys(false)){
-				List<String> list = Main.finalconfig.getStringList("atm_groups." + key);
-				if(list.contains(p.getWorld().getName())){
-					return p.getName() + "_TimBANK_" + key;
-				}
-			}
-		}
-		return p.getName() + "_TimBANK";*/
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
-			if (e.getClickedBlock().getType().name().contains("SIGN")) {
+			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equalsIgnoreCase(CC("&cATM"))) {
 					if (!e.getPlayer().hasPermission("tim.atm.use")) {
