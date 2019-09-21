@@ -99,7 +99,6 @@ public class Metrics {
 		data.osArch = System.getProperty("os.arch");
 		data.osVersion = System.getProperty("os.version");
 		
-		data.diskSize = new File("/").getTotalSpace();
 		
 		if (data.osName.equals("Linux")) {
 			data.linuxDistro = getDistro();
@@ -171,7 +170,6 @@ class Data {
 	public List<String> pluginAuthors;
 	String serverVersion;
 	
-	long diskSize;
 	int coreCnt;
 	String javaRuntime;
 	
