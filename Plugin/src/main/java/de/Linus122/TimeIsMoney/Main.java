@@ -266,6 +266,9 @@ public class Main extends JavaPlugin {
 				if (finalconfig.getString("payouts." + key + ".commands") != null) {
 					payout.commands = finalconfig.getStringList("payouts." + key + ".commands");
 				}
+				if (finalconfig.isSet("payouts." + key + ".commands_if_afk")) {
+					payout.commands_if_afk = finalconfig.getStringList("payouts." + key + ".commands_if_afk");
+				}
 				
 				if (finalconfig.getString("payouts." + key + ".chance") != null) {
 					payout.chance = finalconfig.getInt("payouts." + key + ".chance");
@@ -358,12 +361,25 @@ public class Main extends JavaPlugin {
 		}
 		
 		//AFK CHECK
-		if (!finalconfig.getBoolean("afk_payout") && !p.hasPermission("tim.afkbypass")) {
+		boolean afk = false;
+		double afkPercent = 0.0D;
+		if (!p.hasPermission("tim.afkbypass")) {
 			//ESENTIALS_AFK_FEATURE
 			if (Bukkit.getServer().getPluginManager().isPluginEnabled("Essentials")) {
 				Essentials essentials = (com.earth2me.essentials.Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
 				if (essentials.getUser(p).isAfk()) {
-					//AFK
+					afk = true;
+				}
+			} else {
+				//PLUGIN_AFK_FEATURE
+				if (lastLocation.containsKey(p.getUniqueId())) { //AntiAFK
+					if (lastLocation.get(p.getUniqueId()).getX() == p.getLocation().getX() && lastLocation.get(p.getUniqueId()).getY() == p.getLocation().getY() && lastLocation.get(p.getUniqueId()).getZ() == p.getLocation().getZ() || lastLocation.get(p.getUniqueId()).getYaw() == p.getLocation().getYaw()) {
+						afk = true;
+					}
+				}
+			}
+			if (afk) {
+				if (!finalconfig.getBoolean("afk_payout")) { // Payout is disabled
 					if (finalconfig.getBoolean("display-messages-in-chat")) {
 						sendMessage(p, finalconfig.getString("message_afk"));
 					}
@@ -371,52 +387,57 @@ public class Main extends JavaPlugin {
 						sendActionbar(p, finalconfig.getString("message_afk_actionbar"));
 					}
 					return;
-				}
-			} else {
-				//PLUGIN_AFK_FEATURE
-				if (lastLocation.containsKey(p.getUniqueId())) { //AntiAFK
-					if (lastLocation.get(p.getUniqueId()).getX() == p.getLocation().getX() && lastLocation.get(p.getUniqueId()).getY() == p.getLocation().getY() && lastLocation.get(p.getUniqueId()).getZ() == p.getLocation().getZ() || lastLocation.get(p.getUniqueId()).getYaw() == p.getLocation().getYaw()) {
-						//AFK
-						if (finalconfig.getBoolean("display-messages-in-chat")) {
-							sendMessage(p, finalconfig.getString("message_afk"));
-						}
-						if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
-							sendActionbar(p, finalconfig.getString("message_afk_actionbar"));
-						}
-						return;
+				} else { // Payout is enabled
+					if (!finalconfig.isSet("afk_payout_percent")) {
+						afkPercent = 100; // Payout % isn't set (older config), so assume 100% as before
+					} else {
+						afkPercent = finalconfig.getDouble("afk_payout_percent");
 					}
 				}
 			}
 		}
 		
 		//DEPOSIT
+		double payout_amt = afk ? payout.payout_amount * (afkPercent / 100) : payout.payout_amount;
 		if (finalconfig.getBoolean("store-money-in-bank")) {
-			ATM.depositBank(p, payout.payout_amount);
+			ATM.depositBank(p, payout_amt);
 		} else {
 			double before = 0;
 			if (economy.hasAccount(p)) {
 				before = economy.getBalance(p);
 			}
 			
-			economy.depositPlayer(p, payout.payout_amount);
-			log(p.getName() + ": Deposited: " + payout.payout_amount + " Balance-before: " + before + " Balance-now: " + economy.getBalance(p));
-			
+			economy.depositPlayer(p, payout_amt);
+			log(p.getName() + ": Deposited: " + payout_amt + " Balance-before: " + before + " Balance-now: " + economy.getBalance(p));
 		}
-		if (finalconfig.getBoolean("display-messages-in-chat")) {
-			sendMessage(p, message.replace("%money%", economy.format(payout.payout_amount)));
-		}
-		if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
-			sendActionbar(p, messageActionbar.replace("%money%", economy.format(payout.payout_amount)));
-		}
-		for (String cmd : payout.commands) {
-			dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
+		
+		if (!afk) {
+			if (finalconfig.getBoolean("display-messages-in-chat")) {
+				sendMessage(p, message.replace("%money%", economy.format(payout_amt)));
+			}
+			if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
+				sendActionbar(p, messageActionbar.replace("%money%", economy.format(payout_amt)));
+			}
+			for (String cmd : payout.commands) {
+				dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
+			}
+		} else {
+			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout")) {
+				sendMessage(p, CC(finalconfig.getString("message_afk_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
+			}
+			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout") && useActionbars) {
+				sendActionbar(p, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
+			}
+			for (String cmd : payout.commands_if_afk) {
+				dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
+			}
 		}
 		
 		//ADD PAYED MONEY
 		if (payedMoney.containsKey(p.getName())) {
-			payedMoney.put(p.getName(), payedMoney.get(p.getName()) + payout.payout_amount);
+			payedMoney.put(p.getName(), payedMoney.get(p.getName()) + payout_amt);
 		} else {
-			payedMoney.put(p.getName(), payout.payout_amount);
+			payedMoney.put(p.getName(), payout_amt);
 		}
 		
 		lastLocation.put(p.getUniqueId(), p.getLocation());
