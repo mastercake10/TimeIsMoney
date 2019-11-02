@@ -9,6 +9,9 @@ disabled_in_worlds:
 # You can define if the player gets a payout whether player is afk or not.
 # the permission tim.afkbypass would avoid this for certain user or groups.
 afk_payout: false
+# If afk payout is enabled, what percent should be paid out?
+afk_payout_percent: 10
+
 display-messages-in-chat: true
 display-messages-in-actionbar: true
 display-messages-in-actionbar-time: 10
@@ -34,6 +37,8 @@ payouts:
     max_payout_per_day: 10000
     commands:
       - /give %player% diamond 1
+    commands_if_afk:
+      - /give %player% dirt 1
     # chance: 90
     # You can use any permission name you want. e.g. myserver.donor
     permission: tim.vip
@@ -42,10 +47,12 @@ payouts:
 message: "&aYou earned &c%money% &afor 10 minutes online time!"
 message_payoutlimit_reached: "&cYou have reached the payout limit today. You earned 0$"
 message_afk: "&cYou havn't earned money because you were afk!"
+message_afk_payout: "&6You earned &c%money% (%percent%% of normal payout) &6for 10 minutes online time while afk!"
 message_multiple_ips: "&cYou havn't earned money because you're playing with multiple accounts!"
 message_actionbar: "&aYou earned &c%money% &afor 10 minutes online time!"
 message_payoutlimit_reached_actionbar: "&cYou have reached the payout limit today. You got 0$"
 message_afk_actionbar: "&cYou haven't earned money because you were afk!"
+message_afk_actionbar_payout: "&6You earned &c%money% &6for 10 minutes online time while afk!"
 message_atm_noperms: "&cYou don't have the permission to use ATM's!"
 message_atm_nomoneyinbank: "&cYou don't have enough money in bank!"
 message_atm_nomoney: "&cYou don't have enough money!"

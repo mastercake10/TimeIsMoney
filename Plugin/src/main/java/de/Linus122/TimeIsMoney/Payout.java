@@ -30,4 +30,8 @@ class Payout {
 	 * The list of commands to execute if this payout is earned.
 	 */
 	List<String> commands = new ArrayList<>();
+	/**
+	 * The list of commands to execute if this payout is earned while afk.
+	 */
+	List<String> commands_if_afk = new ArrayList<>();
 }
