@@ -4,6 +4,8 @@ description: Gives money for online time
 author: Linus122
 website: "https://www.spigotmc.org/resources/time-is-money.12409/"
 main: de.Linus122.TimeIsMoney.Main
+api-version: 1.13
+
 
 depend: [Vault]
 softdepend: [Essentials]
