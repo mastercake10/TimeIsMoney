@@ -8,7 +8,7 @@ api-version: 1.13
 
 
 depend: [Vault]
-softdepend: [Essentials]
+softdepend: [Essentials, PlaceholderAPI]
 
 commands:
   timeismoney:

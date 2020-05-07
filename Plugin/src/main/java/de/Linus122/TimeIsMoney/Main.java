@@ -2,6 +2,7 @@ package de.Linus122.TimeIsMoney;
 
 import com.earth2me.essentials.Essentials;
 import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -171,6 +172,13 @@ public class Main extends JavaPlugin {
 			} catch (NullPointerException ignored) {
 			}
 		}, 20L, 20L);
+		
+		// Placeholder API
+
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        	new NamePlaceholder(this).register();
+        }
+		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
 			if (currentDay != new Date().getDay()) { //Next day, clear payouts!
 				log("Cleared all payouts");

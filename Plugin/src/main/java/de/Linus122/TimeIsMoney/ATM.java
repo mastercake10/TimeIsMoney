@@ -123,7 +123,7 @@ public class ATM implements Listener, CommandExecutor {
 	 * @param p The offline player to get the balance of.
 	 * @return The offline player's balance in the bank.
 	 */
-	private static double getBankBalance(OfflinePlayer p) {
+	public static double getBankBalance(OfflinePlayer p) {
 		String bankString = p.getName() + "_TimBANK";
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
 		return bankAccountsConfig.getDouble(bankString);
@@ -135,7 +135,7 @@ public class ATM implements Listener, CommandExecutor {
 	 * @param p The player to get the balance of.
 	 * @return The player's balance in the bank.
 	 */
-	private static double getBankBalance(Player p) {
+	public static double getBankBalance(Player p) {
 		String bankString = getBankString(p);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
 		return bankAccountsConfig.getDouble(bankString);
