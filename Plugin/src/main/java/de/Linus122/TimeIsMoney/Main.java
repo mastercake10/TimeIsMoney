@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -69,7 +70,7 @@ public class Main extends JavaPlugin {
 	/**
 	 * The TimeIsMoney config.
 	 */
-	static YamlConfiguration finalconfig;
+	static FileConfiguration finalconfig;
 	/**
 	 * The list of worlds where the payout feature will be disabled.
 	 */
@@ -121,7 +122,9 @@ public class Main extends JavaPlugin {
 		PL_VERSION = this.getDescription().getVersion();
 		currentDay = (new Date()).getDay();
 		this.reloadConfig();
+		
 		File config = new File("plugins/TimeIsMoney/config.yml");
+		
 		if (config.exists()) {
 			YamlConfiguration cfg = YamlConfiguration.loadConfiguration(config);
 			String old_config = "config_old " + cfg.getInt("configuration-version") + ".yml";
@@ -142,7 +145,8 @@ public class Main extends JavaPlugin {
 			this.saveDefaultConfig();
 		}
 		
-		finalconfig = YamlConfiguration.loadConfiguration(config);
+		finalconfig = this.getConfig();
+		
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
 		
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
@@ -243,14 +247,9 @@ public class Main extends JavaPlugin {
 	 * Reloads TimeIsMoney.
 	 */
 	void reload() {
-	    // cancelling current tasks
-        for (BukkitWorker bw: Bukkit.getScheduler().getActiveWorkers()) {
-            if (bw.getOwner() == this) {
-                Bukkit.getScheduler().cancelTask(bw.getTaskId());
-            }
-        }
-		Bukkit.getPluginManager().disablePlugin(this);
-		Bukkit.getPluginManager().enablePlugin(this);
+		this.reloadConfig();
+		finalconfig = this.getConfig();
+		loadPayouts();
 	}
 	
 	/**
@@ -537,102 +536,5 @@ public class Main extends JavaPlugin {
 				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> actionBarUtils.sendActionBarMessage(p, CC(msg)), 20L * i);
 			}
 		}
-	}
-	
-	/**
-	 * Unloads the specified plugin.
-	 *
-	 * @param pluginName The name of the plugin to unload.
-	 * @return True if the specified plugin was unloaded, false otherwise.
-	 */
-	private boolean unloadPlugin(String pluginName)
-			throws Exception {
-		PluginManager manager = getServer().getPluginManager();
-		SimplePluginManager spmanager = (SimplePluginManager) manager;
-		if (spmanager != null) {
-			Field pluginsField = spmanager.getClass().getDeclaredField("plugins");
-			pluginsField.setAccessible(true);
-			List<Plugin> plugins = (List) pluginsField.get(spmanager);
-			
-			Field lookupNamesField = spmanager.getClass().getDeclaredField("lookupNames");
-			lookupNamesField.setAccessible(true);
-			Map<String, Plugin> lookupNames = (Map) lookupNamesField.get(spmanager);
-			
-			Field commandMapField = spmanager.getClass().getDeclaredField("commandMap");
-			commandMapField.setAccessible(true);
-			SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(spmanager);
-			
-			Field knownCommandsField;
-			Map<String, Command> knownCommands = null;
-			if (commandMap != null) {
-				knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
-				knownCommandsField.setAccessible(true);
-				knownCommands = (Map) knownCommandsField.get(commandMap);
-			}
-			Plugin plugin;
-			Iterator<Map.Entry<String, Command>> it;
-			for (Plugin plugin1 : manager.getPlugins()) {
-				if (plugin1.getDescription().getName().equalsIgnoreCase(pluginName)) {
-					manager.disablePlugin(plugin1);
-					if ((plugins != null) && (plugins.contains(plugin1))) {
-						plugins.remove(plugin1);
-					}
-					if ((lookupNames != null) && (lookupNames.containsKey(pluginName))) {
-						lookupNames.remove(pluginName);
-					}
-					if (commandMap != null) {
-						for (it = knownCommands.entrySet().iterator(); it.hasNext(); ) {
-							Map.Entry<String, Command> entry = it.next();
-							if ((entry.getValue() instanceof PluginCommand)) {
-								PluginCommand command = (PluginCommand) entry.getValue();
-								if (command.getPlugin() == plugin1) {
-									command.unregister(commandMap);
-									it.remove();
-								}
-							}
-						}
-					}
-				}
-			}
-		} else {
-			return true;
-		}
-		return true;
-	}
-	
-	/**
-	 * Loads the specified plugin.
-	 *
-	 * @param pluginName The name of the plugin to load.
-	 * @return True if the specified plugin was loaded, false otherwise.
-	 */
-	private boolean loadPlugin(String pluginName) {
-		try {
-			PluginManager manager = getServer().getPluginManager();
-			Plugin plugin = manager.loadPlugin(new File("plugins", pluginName + ".jar"));
-			if (plugin == null) {
-				return false;
-			}
-			plugin.onLoad();
-			manager.enablePlugin(plugin);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * Reloads the specified plugin.
-	 *
-	 * @param pluginName The name of the plugin to reload.
-	 * @return True if the plugin was reloaded, false otherwise.
-	 * @throws Exception If an error occurred while loading or unloading the specified plugin.
-	 */
-	private boolean reloadPlugin(String pluginName)
-			throws Exception {
-		boolean unload = unloadPlugin(pluginName);
-		boolean load = loadPlugin(pluginName);
-		
-		return unload && load;
 	}
 }
