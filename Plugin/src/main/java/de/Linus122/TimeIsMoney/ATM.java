@@ -409,6 +409,48 @@ public class ATM implements Listener, CommandExecutor {
 						}
 						topBal.entrySet().stream().limit(10).forEach(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Economy.format(entry.getValue())));
 						break;
+					case "take":
+						if(args.length > 2) {
+							Player playerToTake = Bukkit.getPlayer(args[1]);
+							if(playerToTake == null) {
+								cs.sendMessage("§cThis player does not exists");
+								return true;
+							}
+							try {
+								double amount = Double.parseDouble(args[2]);
+								double bal = ATM.getBankBalance(playerToTake);
+								if(amount > bal) {
+									cs.sendMessage("§cAmount to high! Player only has " + Economy.format(bal));
+									return true;
+								}
+								ATM.withdrawBank(playerToTake, amount);
+								cs.sendMessage("§aWithdrew §2" + Economy.format(amount) + ".");
+							}catch(NumberFormatException e) {
+								cs.sendMessage("§cPlease enter a valid decimal");
+							}
+						}else {
+							cs.sendMessage("§c/tim take <player> <amount>");
+						}
+						break;
+					case "give":
+						if(args.length > 2) {
+							Player playerToGive = Bukkit.getPlayer(args[1]);
+							if(playerToGive == null) {
+								cs.sendMessage("§cThis player does not exists");
+								return true;
+							}
+							try {
+								double amount = Double.parseDouble(args[2]);
+								double bal = ATM.getBankBalance(playerToGive);
+								ATM.depositBank(playerToGive, amount);
+								cs.sendMessage("§aDeposited §2" + Economy.format(amount) + ".");
+							}catch(NumberFormatException e) {
+								cs.sendMessage("§cPlease enter a valid decimal");
+							}
+						}else {
+							cs.sendMessage("§c/tim give <player> <amount>");
+						}
+						break;
 					default:
 						@SuppressWarnings("deprecation")
 						OfflinePlayer op = Bukkit.getOfflinePlayer(args[0]);
@@ -425,6 +467,9 @@ public class ATM implements Listener, CommandExecutor {
 			} else {
 				cs.sendMessage(CC("&c/atm <player> &a- opens atm for player"));
 				cs.sendMessage(CC("&c/atm balance <player> &a- gets balance of player"));
+				cs.sendMessage(CC("&c/atm balancetop - Shows the top 10 player atm balances"));
+				cs.sendMessage(CC("&c/atm give <player> &a- Deposits money into a players atm"));
+				cs.sendMessage(CC("&c/atm take <player> &a- Withdraws money from a players atm"));
 				return true;
 			}
 		}
