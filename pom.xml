@@ -6,7 +6,7 @@
 
     <groupId>de.Linus122.TimeIsMoney</groupId>
     <artifactId>parent</artifactId>
-    <version>1.9.6.11</version>
+    <version>1.9.6.12</version>
     <name>TimeIsMoney Parent</name>
     <url>https://www.spigotmc.org/resources/time-is-money.12409/</url>
     <packaging>pom</packaging>
@@ -43,7 +43,7 @@
         </repository>
         <repository>
             <id>ess-repo</id>
-            <url>http://repo.ess3.net/content/groups/essentials</url>
+            <url>https://ci.ender.zone/plugin/repository/everything/</url>
         </repository>
         <repository>
             <id>placeholderapi</id>
