@@ -1,6 +1,10 @@
 package de.Linus122.TimeIsMoney;
 
 import com.google.common.primitives.Doubles;
+
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -230,8 +234,10 @@ public class ATM implements Listener, CommandExecutor {
 						double amount = worths[3 - e.getSlot()];
 						
 						if (ATM.bankHas(p, amount)) {
-							ATM.withdrawBank(p, amount);
-							Main.economy.depositPlayer(p, amount);
+							EconomyResponse response = Main.economy.depositPlayer(p, amount);
+							if (response.type != ResponseType.FAILURE) {
+								ATM.withdrawBank(p, amount);	
+							}
 							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
 						} else {
 							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
