@@ -1,5 +1,6 @@
 package de.Linus122.TimeIsMoney;
 
+import com.earth2me.essentials.api.Economy;
 import com.google.common.primitives.Doubles;
 
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -32,6 +33,8 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
@@ -377,11 +380,11 @@ public class ATM implements Listener, CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender cs, Command arg1, String arg2, String[] args) {
-		if (!(cs instanceof Player)) {
-			cs.sendMessage("Only players can use atms.");
-			return true;
-		}
 		if (args.length == 0) {
+			if (!(cs instanceof Player)) {
+				cs.sendMessage("Only players can use atms.");
+				return true;
+			}
 			if (cs.hasPermission("tim.use")) {
 				openGUI((Player) cs);
 				return true;
@@ -396,6 +399,15 @@ public class ATM implements Listener, CommandExecutor {
 						} else {
 							cs.sendMessage("/atm balance <player>");
 						}
+						break;
+					case "balancetop":
+						cs.sendMessage("§cTop Bank Accounts:");
+						Map<String, Double> topBal = new TreeMap<String, Double>();
+						for (String keyBankString : bankAccountsConfig.getKeys(false)) {
+							double amount = bankAccountsConfig.getDouble(keyBankString);
+							topBal.put(keyBankString, amount);
+						}
+						topBal.entrySet().stream().limit(10).forEach(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Economy.format(entry.getValue())));
 						break;
 					default:
 						@SuppressWarnings("deprecation")
