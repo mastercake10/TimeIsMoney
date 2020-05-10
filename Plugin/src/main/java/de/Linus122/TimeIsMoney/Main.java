@@ -75,10 +75,6 @@ public class Main extends JavaPlugin {
 	 */
 	private static List<String> disabledWorlds;
 	/**
-	 * The IPs of each UUID.
-	 */
-	private static final HashMap<String, UUID> boundIPs = new HashMap<>();
-	/**
 	 * The payouts listed in the config.
 	 */
 	private final List<Payout> payouts = new ArrayList<>();
@@ -156,10 +152,7 @@ public class Main extends JavaPlugin {
 			try {
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					if (disabledWorlds.contains(p.getWorld().getName())) continue;
-
-					if (!boundIPs.containsKey(p.getAddress().getHostString())) {
-						boundIPs.put(p.getAddress().getHostString(), p.getUniqueId());
-					}
+					
 					if (onlineSeconds.containsKey(p.getUniqueId())) {
 						
 						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
@@ -375,11 +368,10 @@ public class Main extends JavaPlugin {
 		}
 		
 		if (!finalconfig.getBoolean("allow-multiple-accounts")) {
-			if (boundIPs.containsKey(p.getAddress().getHostString())) {
-				if (!boundIPs.get(p.getAddress().getHostString()).equals(p.getUniqueId())) {
-					sendMessage(p, finalconfig.getString("message_multiple_ips"));
-					return;
-				}
+			int same_address_count = (int) Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostString().equals(p.getAddress().getHostString())).count();
+			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
+				sendMessage(p, finalconfig.getString("message_multiple_ips"));
+				return;
 			}
 		}
 		
