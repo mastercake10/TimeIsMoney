@@ -23,6 +23,9 @@ allow-multiple-accounts: true
 # Option to increase the maximal amount of players of the same IP getting a payout. Only applies when allow-multiple-accounts is set to false.
 max-multiple-accounts: 1
 
+# Optional: Define a server bank account for withdrawing money from that account for the payouts instead of creating money out of nowhere
+bank-account: ""
+
 # Payouts will be delivered by "chance" instead "permission".
 choose-payout-by-chance: false
 

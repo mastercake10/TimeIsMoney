@@ -2,6 +2,8 @@ package de.Linus122.TimeIsMoney;
 
 import com.earth2me.essentials.Essentials;
 import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -413,6 +415,16 @@ public class Main extends JavaPlugin {
 		
 		//DEPOSIT
 		double payout_amt = afk ? payout.payout_amount * (afkPercent / 100) : payout.payout_amount;
+		
+		// Take money from bank
+		if (finalconfig.getString("bank-account").length() > 0) {
+			EconomyResponse response = economy.bankWithdraw(finalconfig.getString("bank-account"), payout_amt);
+			if(response.type == ResponseType.FAILURE) {
+				System.out.println("§cFailed to take money from bank account: " + finalconfig.getString("bank-account") + " amount " + payout_amt);
+				return;
+			}
+		}
+		
 		if (finalconfig.getBoolean("store-money-in-bank")) {
 			ATM.depositBank(p, payout_amt);
 		} else {
