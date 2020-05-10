@@ -24,6 +24,9 @@ allow-multiple-accounts: true
 # Payouts will be delivered by "chance" instead "permission".
 choose-payout-by-chance: false
 
+# Enable this if you want to add up all lower payouts to the final payout (only relevant when using permissions)
+merge-payouts: false
+
 # You can add as many payouts you want. You only can choose between "permission"
 # and "chance", not both.
 payouts:

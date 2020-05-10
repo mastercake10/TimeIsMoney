@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
@@ -304,31 +306,26 @@ public class Main extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the payout for the specified player.
-	 *
-	 * @param p The player to get the payout of.
-	 * @return The payout of the player.
+	 * Gets a list of applicable payouts for a player. Only returns one payout when using chance.
+	 * 
+	 * @param player The player to get the payouts of.
+	 * @return A list of payouts
 	 */
-	private Payout getPayOutForPlayer(Player p) {
-		Payout finalpayout = null;
+	private List<Payout> getApplicablePayoutsForPlayer(Player player){
 		if (!this.getConfig().getBoolean("choose-payout-by-chance")) {
-			//by Permission
-			for (Payout payout : payouts) {
-				if (payout.permission.equalsIgnoreCase("")) finalpayout = payout;
-				if (p.hasPermission(payout.permission)) {
-					finalpayout = payout;
-				}
-			}
-		} else {
-			//by Chance
+			// Choose applicable payouts by permission
+			return payouts.stream().filter(payout -> player.hasPermission(payout.permission) || payout.permission.length() == 0).collect(Collectors.toList());
+		}else {
+			// Get a random payout
 			Random rnd = new Random();
 			List<Payout> list = new ArrayList<>();
 			for (Payout payout : payouts) {
 				for (int i = 0; i < payout.chance; i++) list.add(payout);
 			}
-			finalpayout = list.get(rnd.nextInt(list.size() - 1));
+			List<Payout> returnlist = new ArrayList<>();
+			returnlist.add(list.get(rnd.nextInt(list.size() - 1)));
+			return returnlist;
 		}
-		return finalpayout;
 	}
 	
 	/**
@@ -345,8 +342,26 @@ public class Main extends JavaPlugin {
 		if (payedMoney.containsKey(p.getName())) {
 			payed = payedMoney.get(p.getName());
 		}
-		Payout payout = getPayOutForPlayer(p);
-		if (payout == null) return;
+		
+		List<Payout> applicablePayouts = this.getApplicablePayoutsForPlayer(p);
+		if (applicablePayouts.size() == 0) {
+			return;
+		}
+		
+		Payout payout = new Payout();
+		
+		if(this.getConfig().getBoolean("merge-payouts")) {
+			// Mering multiple payouts to one
+			for (Payout payout_ : applicablePayouts) {
+				payout.commands.addAll(payout_.commands);
+				payout.commands_if_afk.addAll(payout_.commands_if_afk);
+				payout.payout_amount += payout_.payout_amount;
+				payout.max_payout_per_day += payout_.max_payout_per_day;
+			}	
+		}else {
+			payout = applicablePayouts.get(applicablePayouts.size() - 1);
+		}
+
 		if (payout.max_payout_per_day != -1) {
 			if (payed >= payout.max_payout_per_day) { //Reached max payout
 				if (finalconfig.getBoolean("display-messages-in-chat")) {
