@@ -264,17 +264,17 @@ public class Main extends JavaPlugin {
 				Payout payout = new Payout();
 				payout.max_payout_per_day = finalconfig.getDouble("payouts." + key + ".max_payout_per_day");
 				payout.payout_amount = finalconfig.getDouble("payouts." + key + ".payout_amount");
-				if (finalconfig.getString("payouts." + key + ".permission") != null) {
+				if (finalconfig.isSet("payouts." + key + ".permission")) {
 					payout.permission = finalconfig.getString("payouts." + key + ".permission");
 				}
-				if (finalconfig.getString("payouts." + key + ".commands") != null) {
+				if (finalconfig.isSet("payouts." + key + ".commands")) {
 					payout.commands = finalconfig.getStringList("payouts." + key + ".commands");
 				}
 				if (finalconfig.isSet("payouts." + key + ".commands_if_afk")) {
 					payout.commands_if_afk = finalconfig.getStringList("payouts." + key + ".commands_if_afk");
 				}
 				
-				if (finalconfig.getString("payouts." + key + ".chance") != null) {
+				if (finalconfig.isSet("payouts." + key + ".chance")) {
 					payout.chance = finalconfig.getInt("payouts." + key + ".chance");
 				}
 				payouts.add(payout);
