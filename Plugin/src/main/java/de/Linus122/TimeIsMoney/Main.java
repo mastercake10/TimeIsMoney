@@ -24,7 +24,6 @@ import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -83,6 +82,10 @@ public class Main extends JavaPlugin {
 	 */
 	private final List<Payout> payouts = new ArrayList<>();
 	/**
+	 * The payouts for the day.
+	 */
+	private HashMap<String, Double> payedMoney = new HashMap<>();
+	/**
 	 * The time online in seconds of each player by UUID.
 	 */
 	private final HashMap<UUID, Integer> onlineSeconds = new HashMap<>();
@@ -103,6 +106,10 @@ public class Main extends JavaPlugin {
 	 */
 	private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
 	/**
+	 * The current day.
+	 */
+	private int currentDay = 0;
+	/**
 	 * If actionbars are supported for the server's version.
 	 */
 	private boolean useActionbars = true;
@@ -115,6 +122,7 @@ public class Main extends JavaPlugin {
 	public void onEnable() {
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
+		currentDay = (new Date()).getDay();
 		this.reloadConfig();
 		
 		File config = new File("plugins/TimeIsMoney/config.yml");
@@ -145,6 +153,7 @@ public class Main extends JavaPlugin {
 		
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
 		
+		final int seconds = getConfig().getInt("give_money_every_second");
 		Bukkit.getScheduler().runTaskTimer(this, () -> {
 			try {
 				for (Player p : Bukkit.getOnlinePlayers()) {
@@ -156,7 +165,7 @@ public class Main extends JavaPlugin {
 					} else {
 						onlineSeconds.put(p.getUniqueId(), 1);
 					}
-					if (onlineSeconds.get(p.getUniqueId()) >=  getConfig().getInt("give_money_every_second")) {
+					if (onlineSeconds.get(p.getUniqueId()) >= seconds) {
 						pay(p);
 						onlineSeconds.remove(p.getUniqueId());
 					}
@@ -172,10 +181,10 @@ public class Main extends JavaPlugin {
         }
 		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-			if (PluginData.getLastRefreshDay() != new Date().getDay() && PluginData.getPayedMoney().size() > 0) { //Next day, clear payouts!
-				log("Cleared all payouts for last day");
-				PluginData.getPayedMoney().clear();
-				PluginData.setLastRefreshDay(new Date().getDay());
+			if (currentDay != new Date().getDay()) { //Next day, clear payouts!
+				log("Cleared all payouts");
+				payedMoney.clear();
+				currentDay = new Date().getDay();
 			}
 		}, 20L * 60, 20L * 60 * 15);
 		setupEconomy();
@@ -185,7 +194,14 @@ public class Main extends JavaPlugin {
 		messageActionbar = finalconfig.getString("message_actionbar");
 		messageActionbar = CC(messageActionbar);
 		
-		PluginData.loadData();
+		try {
+			FileInputStream fis = new FileInputStream(new File("plugins/TimeIsMoney/payed_today.data"));
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			payedMoney = (HashMap<String, Double>) ((HashMap<String, Double>) ois.readObject()).clone();
+			
+			ois.close();
+		} catch (Exception ignored) {
+		}
 		
 		loadPayouts();
 		
@@ -219,7 +235,14 @@ public class Main extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
-		PluginData.saveData();
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(new File("plugins/TimeIsMoney/payed_today.data"));
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(payedMoney);
+			oos.close();
+		} catch (Exception ignored) {
+		}
 	}
 
 	/**
@@ -310,8 +333,8 @@ public class Main extends JavaPlugin {
 		
 		//REACHED MAX PAYOUT CHECK
 		double payed = 0;
-		if (PluginData.getPayedMoney().containsKey(p.getName())) {
-			payed = PluginData.getPayedMoney().get(p.getName());
+		if (payedMoney.containsKey(p.getName())) {
+			payed = payedMoney.get(p.getName());
 		}
 		
 		List<Payout> applicablePayouts = this.getApplicablePayoutsForPlayer(p);
@@ -437,10 +460,10 @@ public class Main extends JavaPlugin {
 		}
 		
 		//ADD PAYED MONEY
-		if (PluginData.getPayedMoney().containsKey(p.getName())) {
-			PluginData.getPayedMoney().put(p.getName(), PluginData.getPayedMoney().get(p.getName()) + payout_amt);
+		if (payedMoney.containsKey(p.getName())) {
+			payedMoney.put(p.getName(), payedMoney.get(p.getName()) + payout_amt);
 		} else {
-			PluginData.getPayedMoney().put(p.getName(), payout_amt);
+			payedMoney.put(p.getName(), payout_amt);
 		}
 		
 		lastLocation.put(p.getUniqueId(), p.getLocation());
