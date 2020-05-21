@@ -238,10 +238,10 @@ public class ATM implements Listener, CommandExecutor {
 						
 						if (ATM.bankHas(p, amount)) {
 							EconomyResponse response = Main.economy.depositPlayer(p, amount);
-							if (response.type != ResponseType.FAILURE) {
-								ATM.withdrawBank(p, amount);	
+							if (response.type == ResponseType.SUCCESS) {
+								ATM.withdrawBank(p, amount);
+								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
 							}
-							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
 						} else {
 							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
 						}
