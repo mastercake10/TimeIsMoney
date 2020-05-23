@@ -406,10 +406,7 @@ public class ATM implements Listener, CommandExecutor {
 					case "balancetop":
 						cs.sendMessage("§cTop Bank Accounts:");
 						Map<String, Double> topBal = new TreeMap<String, Double>();
-						topBal.put("test", 1000.3);
-						topBal.put("test3", 670.3);
-						topBal.put("test4", 400.3);
-						topBal.put("test5", 3000.3);
+
 						for (String keyBankString : bankAccountsConfig.getKeys(false)) {
 							double amount = bankAccountsConfig.getDouble(keyBankString);
 							topBal.put(keyBankString, amount);
