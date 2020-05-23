@@ -258,12 +258,13 @@ public class ATM implements Listener, CommandExecutor {
 								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
 							}
 						}
-						ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
-						ItemMeta im = is.getItemMeta();
-						im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
-						is.setItemMeta(im);
-						e.getInventory().setItem(4, is);
 					}
+					// updating atm balance
+					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
+					ItemMeta im = is.getItemMeta();
+					im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
+					is.setItemMeta(im);
+					e.getInventory().setItem(4, is);
 				}
 			}
 		} catch (Exception ignored) {
