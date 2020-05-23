@@ -32,8 +32,10 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
@@ -404,11 +406,16 @@ public class ATM implements Listener, CommandExecutor {
 					case "balancetop":
 						cs.sendMessage("§cTop Bank Accounts:");
 						Map<String, Double> topBal = new TreeMap<String, Double>();
+						topBal.put("test", 1000.3);
+						topBal.put("test3", 670.3);
+						topBal.put("test4", 400.3);
+						topBal.put("test5", 3000.3);
 						for (String keyBankString : bankAccountsConfig.getKeys(false)) {
 							double amount = bankAccountsConfig.getDouble(keyBankString);
 							topBal.put(keyBankString, amount);
 						}
-						topBal.entrySet().stream().limit(10).forEach(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Economy.format(entry.getValue())));
+						topBal.entrySet().stream().
+						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Economy.format(entry.getValue())));
 						break;
 					case "take":
 						if(args.length > 2) {
