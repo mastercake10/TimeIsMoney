@@ -143,7 +143,7 @@ public class Metrics {
 		}
 		//looks for the version file (not all linux distros)
 		File fileVersion = new File("/proc/version");
-		if (fileVersion.exists()) {
+		if (fileVersion.exists() && fileList != null) {
 			fileList = Arrays.copyOf(fileList, fileList.length + 1);
 			fileList[fileList.length - 1] = fileVersion;
 		}
