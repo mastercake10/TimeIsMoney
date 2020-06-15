@@ -147,18 +147,22 @@ public class Metrics {
 			fileList = Arrays.copyOf(fileList, fileList.length + 1);
 			fileList[fileList.length - 1] = fileVersion;
 		}
-		//prints first version-related file
-		for (File f : fileList) {
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(f));
-				String strLine = null;
-				while ((strLine = br.readLine()) != null) {
-					return strLine;
+		
+		if(fileList != null) {
+			//prints first version-related file
+			for (File f : fileList) {
+				try {
+					BufferedReader br = new BufferedReader(new FileReader(f));
+					String strLine = null;
+					while ((strLine = br.readLine()) != null) {
+						return strLine;
+					}
+					br.close();
+				} catch (Exception ignored) {
 				}
-				br.close();
-			} catch (Exception ignored) {
 			}
 		}
+		
 		return "unknown";
 	}
 }
