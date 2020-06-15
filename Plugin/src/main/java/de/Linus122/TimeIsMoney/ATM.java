@@ -420,7 +420,7 @@ public class ATM implements Listener, CommandExecutor {
 							topBal.put(keyBankString, amount);
 						}
 						topBal.entrySet().stream().
-						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Economy.format(entry.getValue())));
+						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Main.economy.format(entry.getValue())));
 						break;
 					case "take":
 						if(args.length > 2) {
