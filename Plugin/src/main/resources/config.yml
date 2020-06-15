@@ -65,6 +65,9 @@ message_atm_noperms: "&cYou don't have the permission to use ATM's!"
 message_atm_nomoneyinbank: "&cYou don't have enough money in bank!"
 message_atm_nomoney: "&cYou don't have enough money!"
 
+# Set this to true to send the payout limit reached message only one time once reached
+display-payout-limit-reached-message-once: false
+
 # ATM -> Place down a sign with [atm] on the first line to use it!
 enable_atm: true
 atm_title: "&cATM"

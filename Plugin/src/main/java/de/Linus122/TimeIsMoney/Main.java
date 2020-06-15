@@ -38,10 +38,12 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,6 +84,11 @@ public class Main extends JavaPlugin {
 	 * The payouts listed in the config.
 	 */
 	private final List<Payout> payouts = new ArrayList<>();
+	
+	/**
+	 * Players that have already reached the payout limit for today
+	 */
+	private Set<UUID> payoutLimitReached = new HashSet<>();
 	/**
 	 * The time online in seconds of each player by UUID.
 	 */
@@ -335,12 +342,19 @@ public class Main extends JavaPlugin {
 
 		if (payout.max_payout_per_day != -1) {
 			if (payed >= payout.max_payout_per_day) { //Reached max payout
+				
+				if(finalconfig.getBoolean("display-payout-limit-reached-message-once") && payoutLimitReached.contains(p.getUniqueId())) {
+					return;
+				}
+				
 				if (finalconfig.getBoolean("display-messages-in-chat")) {
 					sendMessage(p, finalconfig.getString("message_payoutlimit_reached"));
 				}
 				if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
 					sendActionbar(p, finalconfig.getString("message_payoutlimit_reached_actionbar"));
 				}
+				if(finalconfig.getBoolean("display-payout-limit-reached-message-once"))
+					payoutLimitReached.add(p.getUniqueId());
 				return;
 			}
 		}
@@ -444,6 +458,10 @@ public class Main extends JavaPlugin {
 		}
 		
 		lastLocation.put(p.getUniqueId(), p.getLocation());
+		
+		// clear payout limit reached message
+		if(finalconfig.getBoolean("display-payout-limit-reached-message-once"))
+			payoutLimitReached.remove(p.getUniqueId());
 	}
 	
 	/**
