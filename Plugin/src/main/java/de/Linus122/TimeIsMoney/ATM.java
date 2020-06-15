@@ -22,6 +22,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -32,6 +33,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,8 @@ public class ATM implements Listener, CommandExecutor {
 	 * The different amounts of money shown in the atm to withdraw and deposit (atm_worth_gradation).
 	 */
 	private double[] worths = new double[4];
+	
+	private List<Inventory> openATMs = new ArrayList<Inventory>();
 	
 	/**
 	 * Creates a new atm instance with the {@link de.Linus122.TimeIsMoney.Main} class.
@@ -214,10 +218,15 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	
 	@EventHandler
+	public void onClose(InventoryCloseEvent e) {
+		if (e.getInventory() != null)
+			openATMs.remove(e.getInventory());
+	}
+	
+	@EventHandler
 	public void onMove(InventoryMoveItemEvent e) {
 		if (e.getSource() == null || e.getSource().getViewers().size() == 0 || e.getSource().getViewers().get(0).getOpenInventory() == null) return;
-		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle() == null) return;
-		if (e.getSource().getViewers().get(0).getOpenInventory().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+		if (openATMs.contains(e.getSource().getViewers().get(0).getOpenInventory().getTopInventory())) {
 			e.setCancelled(true);
 		}
 	}
@@ -226,10 +235,8 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onClick(InventoryClickEvent e) {
 		try {
-			if (e == null) return;
-			if (e.getInventory() == null) return;
-			if (e.getView().getTitle() == null) return;
-			if (e.getView().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+			if (e == null || e.getInventory() == null) return;
+			if (openATMs.contains(e.getView().getTopInventory())) {
 				e.setResult(Result.DENY);
 				Player p = (Player) e.getWhoClicked();
 				//e.setCancelled(true);
@@ -346,15 +353,16 @@ public class ATM implements Listener, CommandExecutor {
 		is.setItemMeta(im);
 		atm_gui.setItem(8, is);
 		
+		
+		openATMs.add(atm_gui);
 		player.openInventory(atm_gui);
 	}
 	
 	@EventHandler
 	public void onInventoryDrag(InventoryDragEvent e) {
-		if (e == null) return;
-		if (e.getInventory() == null) return;
-		if (e.getView().getTitle() == null) return;
-		if (e.getView().getTitle().equals(CC(Main.finalconfig.getString("atm_title")))) {
+		if (e == null || e.getInventory() == null) return;
+
+		if (openATMs.contains(e.getView().getTopInventory())) {
 			e.setResult(Result.DENY);
 		}
 	}
