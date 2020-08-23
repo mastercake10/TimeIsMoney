@@ -9,6 +9,7 @@ import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -93,26 +94,34 @@ public class ATM implements Listener, CommandExecutor {
 	/**
 	 * Withdraws the specified amount of money from the specified player's bank.
 	 *
-	 * @param p The player to withdraw money from.
+	 * @param player The player to withdraw money from.
 	 * @param amount The amount of money to withdraw.
 	 */
-	private static void withdrawBank(Player p, double amount) {
-		String bankString = getBankString(p);
+	private static void withdrawBank(Player player, double amount) {
+		withdrawBank(player, player.getWorld(), amount);
+	}
+	
+	private static void withdrawBank(OfflinePlayer offlinePlayer, World inWorld, double amount) {
+		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
-		bankAccountsConfig.set(bankString, getBankBalance(p) - amount);
+		bankAccountsConfig.set(bankString, getBankBalance(offlinePlayer, inWorld) - amount);
 		saveBanks();
 	}
 	
 	/**
 	 * Deposits the specified amount of money to the specified player's bank.
 	 *
-	 * @param p The player to deposit money to.
+	 * @param player The player to deposit money to.
 	 * @param amount The amount of money to deposit.
 	 */
-	public static void depositBank(Player p, double amount) {
-		String bankString = getBankString(p);
+	public static void depositBank(Player player, double amount) {
+		depositBank(player, player.getWorld(), amount);
+	}
+	
+	public static void depositBank(OfflinePlayer offlinePlayer, World inWorld, double amount) {
+		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
-		bankAccountsConfig.set(bankString, getBankBalance(p) + amount);
+		bankAccountsConfig.set(bankString, getBankBalance(offlinePlayer, inWorld) + amount);
 		saveBanks();
 	}
 	
@@ -123,21 +132,25 @@ public class ATM implements Listener, CommandExecutor {
 	 * @param amount The amount of money.
 	 * @return True if the player has the specified amount of money, false otherwise.
 	 */
-	private static boolean bankHas(Player p, double amount) {
-		String bankString = getBankString(p);
+	private static boolean bankHas(Player player, double amount) {
+		return bankHas(player, player.getWorld(), amount);
+	}
+	
+	private static boolean bankHas(OfflinePlayer offlinePlayer, World inWorld, double amount) {
+		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
-		return getBankBalance(p) >= amount;
+		return getBankBalance(offlinePlayer) >= amount;
 		
 	}
 	
 	/**
 	 * Gets the balance of the specified player's bank (doesn't support groups).
 	 *
-	 * @param p The offline player to get the balance of.
+	 * @param offlinePlayer The offline player to get the balance of.
 	 * @return The offline player's balance in the bank.
 	 */
-	public static double getBankBalance(OfflinePlayer p) {
-		String bankString = p.getName() + "_TimBANK";
+	public static double getBankBalance(OfflinePlayer offlinePlayer) {
+		String bankString = offlinePlayer.getName() + "_TimBANK";
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
 		return bankAccountsConfig.getDouble(bankString);
 	}
@@ -145,11 +158,15 @@ public class ATM implements Listener, CommandExecutor {
 	/**
 	 * Gets the balance of the specified player's bank.
 	 *
-	 * @param p The player to get the balance of.
+	 * @param player The player to get the balance of.
 	 * @return The player's balance in the bank.
 	 */
-	public static double getBankBalance(Player p) {
-		String bankString = getBankString(p);
+	public static double getBankBalance(Player player) {
+		return getBankBalance(player, player.getWorld());
+	}
+	
+	public static double getBankBalance(OfflinePlayer offlinePlayer, World inWorld) {
+		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
 		return bankAccountsConfig.getDouble(bankString);
 	}
@@ -167,9 +184,11 @@ public class ATM implements Listener, CommandExecutor {
 	
 	/**
 	 * Converts the old TimeIsMoney bank data to the new format.
-	 *
+	 * 
+	 * @deprecated ancient method, will be deleted soon
 	 * @param p The player to convert data for.
 	 */
+	@Deprecated
 	private static void convertOldBank(Player p) {
 		String bankString = getBankString(p);
 		if (Main.economy.hasAccount(bankString)) {
@@ -184,21 +203,25 @@ public class ATM implements Listener, CommandExecutor {
 	/**
 	 * Gets the bank string for the specified player.
 	 *
-	 * @param p The player to get the bank string of.
+	 * @param player The player to get the bank string of.
 	 * @return The bank string of the specified player.
 	 */
-	private static String getBankString(Player p) {
+	private static String getBankString(Player player) {
+		return getBankString(player, player.getWorld());
+	}
+	
+	private static String getBankString(OfflinePlayer offlinePlayer, World inWorld) {
 		if (!Main.finalconfig.getBoolean("group-atms")) {
-			return p.getName() + "_TimBANK";
+			return offlinePlayer.getName() + "_TimBANK";
 		} else {
 			for (String key : Main.finalconfig.getConfigurationSection("atm_groups").getKeys(false)) {
 				List<String> list = Main.finalconfig.getStringList("atm_groups." + key);
-				if (list.contains(p.getWorld().getName())) {
-					return p.getName() + "_TimBANK_" + key;
+				if (list.contains(inWorld.getName())) {
+					return inWorld.getName() + "_TimBANK_" + key;
 				}
 			}
 		}
-		return p.getName() + "_TimBANK";
+		return offlinePlayer.getName() + "_TimBANK";
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -424,7 +447,9 @@ public class ATM implements Listener, CommandExecutor {
 						break;
 					case "take":
 						if(args.length > 2) {
-							Player playerToTake = Bukkit.getPlayer(args[1]);
+							OfflinePlayer playerToTake = Bukkit.getOfflinePlayer(args[1]);
+							String inWorld = args.length > 3 ? args[3] : "world";
+							
 							if(playerToTake == null) {
 								cs.sendMessage("§cThis player does not exists");
 								return true;
@@ -436,18 +461,21 @@ public class ATM implements Listener, CommandExecutor {
 									cs.sendMessage("§cAmount to high! Player only has " + Economy.format(bal));
 									return true;
 								}
-								ATM.withdrawBank(playerToTake, amount);
+								ATM.withdrawBank(playerToTake, Bukkit.getWorld(inWorld), amount);
 								cs.sendMessage("§aWithdrew §2" + Economy.format(amount) + ".");
 							}catch(NumberFormatException e) {
 								cs.sendMessage("§cPlease enter a valid decimal");
 							}
 						}else {
-							cs.sendMessage("§c/tim take <player> <amount>");
+							cs.sendMessage("§c/tim take <player> <amount> [world]");
 						}
 						break;
 					case "give":
 						if(args.length > 2) {
-							Player playerToGive = Bukkit.getPlayer(args[1]);
+							
+							OfflinePlayer playerToGive = Bukkit.getOfflinePlayer(args[1]);
+							String inWorld = args.length > 3 ? args[3] : "world";
+							
 							if(playerToGive == null) {
 								cs.sendMessage("§cThis player does not exists");
 								return true;
@@ -455,13 +483,13 @@ public class ATM implements Listener, CommandExecutor {
 							try {
 								double amount = Double.parseDouble(args[2]);
 								double bal = ATM.getBankBalance(playerToGive);
-								ATM.depositBank(playerToGive, amount);
+								ATM.depositBank(playerToGive, Bukkit.getWorld(inWorld), amount);
 								cs.sendMessage("§aDeposited §2" + Economy.format(amount) + ".");
 							}catch(NumberFormatException e) {
 								cs.sendMessage("§cPlease enter a valid decimal");
 							}
 						}else {
-							cs.sendMessage("§c/tim give <player> <amount>");
+							cs.sendMessage("§c/tim give <player> <amount> [world]");
 						}
 						break;
 					default:
@@ -474,16 +502,15 @@ public class ATM implements Listener, CommandExecutor {
 						if (op.isOnline()) {
 							openGUI(op.getPlayer());
 							cs.sendMessage("opened!");
+							return true;
 						}
+						cs.sendMessage(CC("&c/atm <player> &a- opens atm for player"));
+						cs.sendMessage(CC("&c/atm balance <player> &a- gets balance of player"));
+						cs.sendMessage(CC("&c/atm balancetop - Shows the top 10 player atm balances"));
+						cs.sendMessage(CC("&c/atm give <player> [world] &a- Deposits money into a players atm"));
+						cs.sendMessage(CC("&c/atm take <player> [world] &a- Withdraws money from a players atm"));
 						break;
 				}
-			} else {
-				cs.sendMessage(CC("&c/atm <player> &a- opens atm for player"));
-				cs.sendMessage(CC("&c/atm balance <player> &a- gets balance of player"));
-				cs.sendMessage(CC("&c/atm balancetop - Shows the top 10 player atm balances"));
-				cs.sendMessage(CC("&c/atm give <player> &a- Deposits money into a players atm"));
-				cs.sendMessage(CC("&c/atm take <player> &a- Withdraws money from a players atm"));
-				return true;
 			}
 		}
 		return true;
