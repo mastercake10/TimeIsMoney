@@ -20,6 +20,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitWorker;
 
 import java.io.File;
@@ -98,14 +99,6 @@ public class Main extends JavaPlugin {
 	 */
 	private final HashMap<UUID, Location> lastLocation = new HashMap<>();
 	/**
-	 * The chat message.
-	 */
-	private String message;
-	/**
-	 * The actionbar message.
-	 */
-	private String messageActionbar;
-	/**
 	 * The console logger.
 	 */
 	private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
@@ -113,6 +106,11 @@ public class Main extends JavaPlugin {
 	 * If actionbars are supported for the server's version.
 	 */
 	private boolean useActionbars = true;
+	
+	/**
+	 * Main task for keeping track of player's online time
+	 */
+	private BukkitTask playtimeWatcherTask;
 	
 	/**
 	 * {@inheritDoc}
@@ -152,25 +150,7 @@ public class Main extends JavaPlugin {
 		
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
 		
-		Bukkit.getScheduler().runTaskTimer(this, () -> {
-			try {
-				for (Player p : Bukkit.getOnlinePlayers()) {
-					if (disabledWorlds.contains(p.getWorld().getName())) continue;
-					
-					if (onlineSeconds.containsKey(p.getUniqueId())) {
-						
-						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
-					} else {
-						onlineSeconds.put(p.getUniqueId(), 1);
-					}
-					if (onlineSeconds.get(p.getUniqueId()) >=  getConfig().getInt("give_money_every_second")) {
-						pay(p);
-						onlineSeconds.remove(p.getUniqueId());
-					}
-				}
-			} catch (NullPointerException ignored) {
-			}
-		}, 20L, 20L);
+		startPlaytimeWatcher();
 		
 		// Placeholder API
 
@@ -186,11 +166,6 @@ public class Main extends JavaPlugin {
 			}
 		}, 20L * 60, 20L * 60 * 15);
 		setupEconomy();
-		
-		message = finalconfig.getString("message");
-		message = CC(message);
-		messageActionbar = finalconfig.getString("message_actionbar");
-		messageActionbar = CC(messageActionbar);
 		
 		PluginData.loadData();
 		
@@ -221,11 +196,34 @@ public class Main extends JavaPlugin {
 		clogger.sendMessage(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
 	}
 	
+	public void startPlaytimeWatcher() {
+		playtimeWatcherTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
+			try {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					if (disabledWorlds.contains(p.getWorld().getName())) continue;
+					
+					if (onlineSeconds.containsKey(p.getUniqueId())) {
+						
+						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
+					} else {
+						onlineSeconds.put(p.getUniqueId(), 1);
+					}
+					if (onlineSeconds.get(p.getUniqueId()) >=  getConfig().getInt("give_money_every_second")) {
+						pay(p);
+						onlineSeconds.remove(p.getUniqueId());
+					}
+				}
+			} catch (NullPointerException ignored) {
+			}
+		}, 20L, 20L);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void onDisable() {
+		playtimeWatcherTask.cancel();
 		PluginData.saveData();
 	}
 
@@ -430,10 +428,10 @@ public class Main extends JavaPlugin {
 		
 		if (!afk) {
 			if (finalconfig.getBoolean("display-messages-in-chat")) {
-				sendMessage(p, message.replace("%money%", economy.format(payout_amt)));
+				sendMessage(p, CC(finalconfig.getString("message")).replace("%money%", economy.format(payout_amt)));
 			}
 			if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
-				sendActionbar(p, messageActionbar.replace("%money%", economy.format(payout_amt)));
+				sendActionbar(p, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
 			}
 			for (String cmd : payout.commands) {
 				dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
