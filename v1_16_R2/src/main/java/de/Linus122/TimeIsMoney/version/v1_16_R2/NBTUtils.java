@@ -1,10 +1,10 @@
-package de.Linus122.TimeIsMoney.version.v1_16_R1;
+package de.Linus122.TimeIsMoney.version.v1_16_R2;
 
 import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
-import net.minecraft.server.v1_16_R1.ChatMessageType;
-import net.minecraft.server.v1_16_R1.IChatBaseComponent;
-import net.minecraft.server.v1_16_R1.PacketPlayOutChat;
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
+import net.minecraft.server.v1_16_R2.ChatMessageType;
+import net.minecraft.server.v1_16_R2.IChatBaseComponent;
+import net.minecraft.server.v1_16_R2.PacketPlayOutChat;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
@@ -12,10 +12,10 @@ import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 import java.util.UUID;
 
 /**
- * NBT Utils for v1_16_R1.
+ * NBT Utils for v1_16_R2.
  *
  * @author Linus122
- * @since 1.9.6.11
+ * @since 1.9.6.12
  */
 public class NBTUtils implements ActionBarUtils {
 	/**
