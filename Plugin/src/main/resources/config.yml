@@ -70,6 +70,8 @@ display-payout-limit-reached-message-once: false
 
 # ATM -> Place down a sign with [atm] on the first line to use it!
 enable_atm: true
+# The label that is drawn on the sign upon placement (keep in mind that ATM signs are tracked using this tag, so choose something "unique")
+atm_sign_label: "&cATM"
 atm_title: "&cATM"
 atm_withdraw: "&cWithdraw"
 atm_deposit: "&cDeposit"

@@ -69,6 +69,8 @@ public class ATM implements Listener, CommandExecutor {
 	
 	private List<Inventory> openATMs = new ArrayList<Inventory>();
 	
+	final String atmSignLabel = Main.finalconfig.getString("atm_sign_label");
+	
 	/**
 	 * Creates a new atm instance with the {@link de.Linus122.TimeIsMoney.Main} class.
 	 *
@@ -229,7 +231,7 @@ public class ATM implements Listener, CommandExecutor {
 		if (e.getClickedBlock() != null) {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
-				if (sign.getLine(0).equalsIgnoreCase(CC("&cATM"))) {
+				if (sign.getLine(0).equalsIgnoreCase(CC(atmSignLabel))) {
 					if (!e.getPlayer().hasPermission("tim.atm.use")) {
 						e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_noperms")));
 					} else {
@@ -397,12 +399,12 @@ public class ATM implements Listener, CommandExecutor {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 				if (b.getState() instanceof Sign) {
 					Sign sign = (Sign) e.getBlock().getState();
-					if (sign.getLine(0).equalsIgnoreCase("[atm]")) {
+					if (sign.getLine(0).equalsIgnoreCase("[ATM]")) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
-							e.getPlayer().sendMessage(CC("&cYou dont have permissions to build ATM's!"));
+							e.getPlayer().sendMessage(CC("&cYou dont have permissions to build ATM's (tim.atm.place)"));
 							sign.setLine(0, "");
 						} else {
-							sign.setLine(0, CC("&cATM"));
+							sign.setLine(0, CC(atmSignLabel));
 							sign.update();
 							e.getPlayer().sendMessage(CC("&2ATM created! (You can also write something in the Lines 2-4)"));
 						}
