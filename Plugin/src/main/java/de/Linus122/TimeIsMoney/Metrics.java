@@ -101,7 +101,12 @@ public class Metrics {
 		
 		
 		if (data.osName.equals("Linux")) {
-			data.linuxDistro = getDistro();
+			try {
+				data.linuxDistro = getDistro();
+			} catch(SecurityException exception) {
+				// cath this exception
+				data.linuxDistro = "unknown";
+			}
 		}
 		
 		return gson.toJson(data);
