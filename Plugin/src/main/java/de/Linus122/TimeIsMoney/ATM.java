@@ -419,7 +419,7 @@ public class ATM implements Listener, CommandExecutor {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 				if (b.getState() instanceof Sign) {
 					Sign sign = (Sign) e.getBlock().getState();
-					if (sign.getLine(0).equalsIgnoreCase("[ATM]")) {
+					if (sign.getLine(0).equalsIgnoreCase("[ATM]") || sign.getLine(0).equalsIgnoreCase(atmSignLabel) || sign.getLine(0).equalsIgnoreCase(CC(atmSignLabel))) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
 							e.getPlayer().sendMessage(CC("&cYou dont have permissions to build ATM's (tim.atm.place)"));
 							sign.setLine(0, "");
