@@ -35,10 +35,13 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.TreeMap;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
@@ -92,6 +95,7 @@ public class ATM implements Listener, CommandExecutor {
 		
 		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
 	}
+	
 	
 	/**
 	 * Withdraws the specified amount of money from the specified player's bank.
@@ -192,7 +196,7 @@ public class ATM implements Listener, CommandExecutor {
 	 */
 	@Deprecated
 	private static void convertOldBank(Player p) {
-		String bankString = getBankString(p);
+		String bankString = getBankString(p, p.getWorld());
 		if (Main.economy.hasAccount(bankString)) {
 			if (Main.economy.getBalance(bankString) > 0) {
 				p.sendMessage(CC("&aSuccessfully converted your old TIM-Bank to new version!"));
@@ -204,17 +208,33 @@ public class ATM implements Listener, CommandExecutor {
 	
 	/**
 	 * Gets the bank string for the specified player.
+	 * Converts old bank accounts (those saved using the user name) to new bank accounts using UUID's.
 	 *
 	 * @param player The player to get the bank string of.
+	 * @param inWorld The World. Only needs to be specified when working with grouped ATM's (world-wise)
 	 * @return The bank string of the specified player.
 	 */
-	private static String getBankString(Player player) {
-		return getBankString(player, player.getWorld());
+	private static String getBankString(OfflinePlayer player, World inWorld) {
+		String oldBank = getBankStringByPrefix(player.getName(), inWorld);
+		if(bankAccountsConfig.contains(oldBank)) {
+			double oldMoneyAmount = bankAccountsConfig.getDouble(oldBank);
+			bankAccountsConfig.set(getBankStringByPrefix(player.getUniqueId().toString(), inWorld), oldMoneyAmount);
+			bankAccountsConfig.set(oldBank, null);
+		}
+		
+		return getBankStringByPrefix(player.getUniqueId().toString(), inWorld);
 	}
 	
-	private static String getBankString(OfflinePlayer offlinePlayer, World inWorld) {
+	/**
+	 * Returns the bank string of a player that is used internally for storing the money on.
+	 * 
+	 * @param prefix The prefix to work with
+	 * @param inWorld The World. Only needs to be specified when working with grouped ATM's (world-wise)
+	 * @return The bank string of the specified player.
+	 */
+	private static String getBankStringByPrefix(String prefix, World inWorld) {
 		if (!Main.finalconfig.getBoolean("group-atms")) {
-			return offlinePlayer.getName() + "_TimBANK";
+			return prefix + "_TimBANK";
 		} else {
 			for (String key : Main.finalconfig.getConfigurationSection("atm_groups").getKeys(false)) {
 				List<String> list = Main.finalconfig.getStringList("atm_groups." + key);
@@ -223,7 +243,7 @@ public class ATM implements Listener, CommandExecutor {
 				}
 			}
 		}
-		return offlinePlayer.getName() + "_TimBANK";
+		return prefix + "_TimBANK";
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
