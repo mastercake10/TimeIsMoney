@@ -421,12 +421,12 @@ public class ATM implements Listener, CommandExecutor {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[ATM]") || sign.getLine(0).equalsIgnoreCase(atmSignLabel) || sign.getLine(0).equalsIgnoreCase(CC(atmSignLabel))) {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
-							e.getPlayer().sendMessage(CC("&cYou dont have permissions to build ATM's (tim.atm.place)"));
+							e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_nopermbuild")));
 							sign.setLine(0, "");
 						} else {
 							sign.setLine(0, CC(atmSignLabel));
 							sign.update();
-							e.getPlayer().sendMessage(CC("&2ATM created! (You can also write something in the Lines 2-4)"));
+							e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_created")));
 						}
 					}
 				}
