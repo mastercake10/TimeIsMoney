@@ -408,6 +408,7 @@ public class ATM implements Listener, CommandExecutor {
 	@EventHandler
 	public void onSignChange(final SignChangeEvent e) {
 		final Block b = e.getBlock();
+		
 		if (b.getState() instanceof Sign) {
 			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
 				if (b.getState() instanceof Sign) {
@@ -418,6 +419,8 @@ public class ATM implements Listener, CommandExecutor {
 						if (!e.getPlayer().hasPermission("tim.atm.place")) {
 							e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_nopermbuild")));
 							sign.setLine(0, "");
+							e.setCancelled(true);
+							b.setType(Material.AIR);
 						} else {
 							sign.setLine(0, CC(Main.finalconfig.getString("atm_sign_label")));
 							sign.update();
