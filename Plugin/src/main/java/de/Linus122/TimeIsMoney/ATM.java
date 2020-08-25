@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
@@ -463,7 +464,7 @@ public class ATM implements Listener, CommandExecutor {
 							topBal.put(keyBankString, amount);
 						}
 						topBal.entrySet().stream().
-						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Main.economy.format(entry.getValue())));
+						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + Bukkit.getOfflinePlayer(UUID.fromString(entry.getKey().split("_")[0])).getName() + "§2: " + Main.economy.format(entry.getValue())));
 						break;
 					case "take":
 						if(args.length > 2) {
