@@ -42,7 +42,7 @@ public class NamePlaceholder extends PlaceholderExpansion {
 	public String onRequest(OfflinePlayer player, String label) {
 		switch(label) {
 			case "atm":
-				return Main.economy.format(ATM.getBankBalance(player));
+				return Main.economy.format(ATM.getBankBalance(player, null));
 		}
 		return null;
 	}

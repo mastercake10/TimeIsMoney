@@ -143,7 +143,7 @@ public class ATM implements Listener, CommandExecutor {
 	private static boolean bankHas(OfflinePlayer offlinePlayer, World inWorld, double amount) {
 		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
-		return getBankBalance(offlinePlayer) >= amount;
+		return getBankBalance(offlinePlayer, inWorld) >= amount;
 		
 	}
 	
@@ -151,10 +151,11 @@ public class ATM implements Listener, CommandExecutor {
 	 * Gets the balance of the specified player's bank (doesn't support groups).
 	 *
 	 * @param offlinePlayer The offline player to get the balance of.
+	 * @param inWorld The World. Only needs to be specified when working with grouped ATM's (world-wise)
 	 * @return The offline player's balance in the bank.
 	 */
-	public static double getBankBalance(OfflinePlayer offlinePlayer) {
-		String bankString = offlinePlayer.getName() + "_TimBANK";
+	public static double getBankBalance(OfflinePlayer offlinePlayer, World inWorld) {
+		String bankString = getBankString(offlinePlayer, inWorld);
 		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
 		return bankAccountsConfig.getDouble(bankString);
 	}
@@ -167,12 +168,6 @@ public class ATM implements Listener, CommandExecutor {
 	 */
 	public static double getBankBalance(Player player) {
 		return getBankBalance(player, player.getWorld());
-	}
-	
-	public static double getBankBalance(OfflinePlayer offlinePlayer, World inWorld) {
-		String bankString = getBankString(offlinePlayer, inWorld);
-		if (!bankAccountsConfig.contains(bankString)) bankAccountsConfig.set(bankString, 0.0);
-		return bankAccountsConfig.getDouble(bankString);
 	}
 	
 	/**
@@ -451,7 +446,7 @@ public class ATM implements Listener, CommandExecutor {
 				switch (args[0]) {
 					case "balance":
 						if (args.length > 1) {
-							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + getBankBalance(Bukkit.getOfflinePlayer(args[1])));
+							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + getBankBalance(Bukkit.getOfflinePlayer(args[1]), null));
 						} else {
 							cs.sendMessage("/atm balance <player>");
 						}
@@ -478,7 +473,7 @@ public class ATM implements Listener, CommandExecutor {
 							}
 							try {
 								double amount = Double.parseDouble(args[2]);
-								double bal = ATM.getBankBalance(playerToTake);
+								double bal = ATM.getBankBalance(playerToTake, null);
 								if(amount > bal) {
 									cs.sendMessage("§cAmount to high! Player only has " + Economy.format(bal));
 									return true;
@@ -504,7 +499,7 @@ public class ATM implements Listener, CommandExecutor {
 							}
 							try {
 								double amount = Double.parseDouble(args[2]);
-								double bal = ATM.getBankBalance(playerToGive);
+								double bal = ATM.getBankBalance(playerToGive, null);
 								ATM.depositBank(playerToGive, Bukkit.getWorld(inWorld), amount);
 								cs.sendMessage("§aDeposited §2" + Economy.format(amount) + ".");
 							}catch(NumberFormatException e) {
