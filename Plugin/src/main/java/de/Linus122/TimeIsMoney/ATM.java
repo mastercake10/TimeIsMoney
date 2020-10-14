@@ -450,7 +450,7 @@ public class ATM implements Listener, CommandExecutor {
 				switch (args[0]) {
 					case "balance":
 						if (args.length > 1) {
-							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + getBankBalance(Bukkit.getOfflinePlayer(args[1]), null));
+							cs.sendMessage(CC("&2ATM-Balance of&c " + args[1] + "&2: &c") + Economy.format(getBankBalance(Bukkit.getOfflinePlayer(args[1]), null)));
 						} else {
 							cs.sendMessage("/atm balance <player>");
 						}
