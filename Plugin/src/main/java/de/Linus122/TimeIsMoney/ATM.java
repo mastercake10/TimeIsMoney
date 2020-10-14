@@ -461,10 +461,15 @@ public class ATM implements Listener, CommandExecutor {
 
 						for (String keyBankString : bankAccountsConfig.getKeys(false)) {
 							double amount = bankAccountsConfig.getDouble(keyBankString);
-							topBal.put(keyBankString, amount);
+							String formattedDisplayString = keyBankString.split("_")[0];
+							if(formattedDisplayString.length() > 16) {
+								// uuid
+								formattedDisplayString = Bukkit.getOfflinePlayer(UUID.fromString(formattedDisplayString)).getName();
+							}
+							topBal.put(formattedDisplayString, amount);
 						}
 						topBal.entrySet().stream().
-						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + Bukkit.getOfflinePlayer(UUID.fromString(entry.getKey().split("_")[0])).getName() + "§2: " + Main.economy.format(entry.getValue())));
+						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Main.economy.format(entry.getValue())));
 						break;
 					case "take":
 						if(args.length > 2) {
@@ -528,8 +533,8 @@ public class ATM implements Listener, CommandExecutor {
 						cs.sendMessage(CC("&c/atm <player> &a- opens atm for player"));
 						cs.sendMessage(CC("&c/atm balance <player> &a- gets balance of player"));
 						cs.sendMessage(CC("&c/atm balancetop - Shows the top 10 player atm balances"));
-						cs.sendMessage(CC("&c/atm give <player> [world] &a- Deposits money into a players atm"));
-						cs.sendMessage(CC("&c/atm take <player> [world] &a- Withdraws money from a players atm"));
+						cs.sendMessage(CC("&c/atm give <player> <amount> [world] &a- Deposits money into a players atm"));
+						cs.sendMessage(CC("&c/atm take <player> <amount> [world] &a- Withdraws money from a players atm"));
 						break;
 				}
 			}
