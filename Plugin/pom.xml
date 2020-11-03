@@ -161,5 +161,10 @@
 			<artifactId>v1_16_R2</artifactId>
 			<version>1.9.6.18</version>
 		</dependency>
+		<dependency>
+			<groupId>de.Linus122.TimeIsMoney</groupId>
+			<artifactId>v1_16_R3</artifactId>
+			<version>1.9.6.18</version>
+		</dependency>
 	</dependencies>
 </project>
