@@ -8,6 +8,7 @@ main: de.Linus122.TimeIsMoney.Main
 
 depend: [Vault]
 softdepend: [Essentials, PlaceholderAPI]
+api-version: '1.13'
 
 commands:
   timeismoney:
