@@ -2,6 +2,8 @@ package de.Linus122.TimeIsMoney;
 
 import com.earth2me.essentials.Essentials;
 import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
@@ -170,23 +172,8 @@ public class Main extends JavaPlugin {
 		PluginData.loadData();
 		
 		loadPayouts();
-		
-		String packageName = this.getServer().getClass().getPackage().getName();
-		// Get full package string of CraftServer.
-		// org.bukkit.craftbukkit.version
-		String Bukkitversion = packageName.substring(packageName.lastIndexOf('.') + 1);
-		// Get the last element of the package
-		try {
-			final Class<?> clazz = Class.forName("de.Linus122.TimeIsMoney.version." + Bukkitversion + ".NBTUtils");
-			// Check if we have a NMSHandler class at that location.
-			if (ActionBarUtils.class.isAssignableFrom(clazz)) { // Make sure it actually implements NMS
-				actionBarUtils = (ActionBarUtils) clazz.getConstructor().newInstance(); // Set our handler
-			}
-		} catch (final Exception e) {
-			this.getLogger().severe("Actionbars are not supported on your spigot version, sorry.");
-			useActionbars = false;
-			return;
-		}
+
+		actionBarUtils = ((p, message) -> p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message)));
 		
 		if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
 			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
