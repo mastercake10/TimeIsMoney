@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.Linus122.TimeIsMoney</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.9.6.18</version>
+		<version>1.9.6.19</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -54,6 +54,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
+					<outputDirectory>${dir}</outputDirectory>
+					<finalName>${project.parent.name}-${project.version}</finalName>
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
 					</archive>

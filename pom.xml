@@ -6,8 +6,8 @@
 
     <groupId>de.Linus122.TimeIsMoney</groupId>
     <artifactId>parent</artifactId>
-    <version>1.9.6.18</version>
-    <name>TimeIsMoney Parent</name>
+    <version>1.9.6.19</version>
+    <name>TimeIsMoney</name>
     <url>https://www.spigotmc.org/resources/time-is-money.12409/</url>
     <packaging>pom</packaging>
 
