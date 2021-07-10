@@ -1,56 +1,42 @@
 package de.Linus122.TimeIsMoney;
 
-import com.earth2me.essentials.Essentials;
-import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.command.Command;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scheduler.BukkitWorker;
+import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static de.Linus122.TimeIsMoney.tools.Utils.CC;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+
+import com.earth2me.essentials.Essentials;
+
+import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 /**
  * The main class for TimeIsMoney
@@ -63,10 +49,6 @@ public class Main extends JavaPlugin {
 	 * The economy being used by vault.
 	 */
 	static net.milkbowl.vault.economy.Economy economy = null;
-	/**
-	 * The actionbar utils class, null if not using a supported server version.
-	 */
-	private static ActionBarUtils actionBarUtils = null;
 	/**
 	 * The config version number.
 	 */
@@ -104,10 +86,6 @@ public class Main extends JavaPlugin {
 	 * The console logger.
 	 */
 	private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
-	/**
-	 * If actionbars are supported for the server's version.
-	 */
-	private boolean useActionbars = true;
 	
 	/**
 	 * Main task for keeping track of player's online time
@@ -172,8 +150,6 @@ public class Main extends JavaPlugin {
 		PluginData.loadData();
 		
 		loadPayouts();
-
-		actionBarUtils = ((p, message) -> p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message)));
 		
 		if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
 			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
@@ -335,7 +311,7 @@ public class Main extends JavaPlugin {
 				if (finalconfig.getBoolean("display-messages-in-chat")) {
 					sendMessage(p, finalconfig.getString("message_payoutlimit_reached"));
 				}
-				if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
+				if (finalconfig.getBoolean("display-messages-in-actionbar")) {
 					sendActionbar(p, finalconfig.getString("message_payoutlimit_reached_actionbar"));
 				}
 				if(finalconfig.getBoolean("display-payout-limit-reached-message-once"))
@@ -375,7 +351,7 @@ public class Main extends JavaPlugin {
 					if (finalconfig.getBoolean("display-messages-in-chat")) {
 						sendMessage(p, finalconfig.getString("message_afk"));
 					}
-					if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
+					if (finalconfig.getBoolean("display-messages-in-actionbar")) {
 						sendActionbar(p, finalconfig.getString("message_afk_actionbar"));
 					}
 					return;
@@ -417,7 +393,7 @@ public class Main extends JavaPlugin {
 			if (finalconfig.getBoolean("display-messages-in-chat")) {
 				sendMessage(p, CC(finalconfig.getString("message")).replace("%money%", economy.format(payout_amt)));
 			}
-			if (finalconfig.getBoolean("display-messages-in-actionbar") && useActionbars) {
+			if (finalconfig.getBoolean("display-messages-in-actionbar")) {
 				sendActionbar(p, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
 			}
 			for (String cmd : payout.commands) {
@@ -427,7 +403,7 @@ public class Main extends JavaPlugin {
 			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout")) {
 				sendMessage(p, CC(finalconfig.getString("message_afk_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
-			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout") && useActionbars) {
+			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout")) {
 				sendActionbar(p, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
 			for (String cmd : payout.commands_if_afk) {
@@ -505,28 +481,59 @@ public class Main extends JavaPlugin {
 		if (msg.length() == 0) return;
 		p.sendMessage(CC(msg));
 	}
-	
+
 	/**
 	 * Sends an actionbar message to the specified player.
 	 *
-	 * @param p The player to send the actionbar message to.
-	 * @param msg The message the actionbar should give to the player.
+	 * @param player The player to send the actionbar message to.
+	 * @param message The message the actionbar should give to the player.
 	 */
-	private void sendActionbar(final Player p, final String msg) {
-		if (msg.length() == 0) return;
+	private void sendActionbar(final Player player, final String message) {
+		if (message.length() == 0) return;
 		int times = finalconfig.getInt("display-messages-in-actionbar-time");
 		if (times == 1) {
-			if (actionBarUtils != null) {
-				actionBarUtils.sendActionBarMessage(p, msg);
-			}
+			sendSingleActionbarMessage(player, CC(message));
 		} else if (times > 1) {
-			if (actionBarUtils != null) {
-				actionBarUtils.sendActionBarMessage(p, msg);
-			}
+			sendSingleActionbarMessage(player, CC(message));
+			
 			times--;
 			for (int i = 0; i < times; i++) {
-				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> actionBarUtils.sendActionBarMessage(p, CC(msg)), 20L * i);
+				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> sendSingleActionbarMessage(player, CC(message)), 20L * i);
 			}
+		}
+	}
+	
+	private void sendSingleActionbarMessage(final Player player, final String message) {
+		String packageName = this.getServer().getClass().getPackage().getName();
+        int version = Integer.parseInt(packageName.substring(packageName.lastIndexOf('.') + 1).split("_")[1]);
+        if(version == 8) {
+        	// 1_8_R*
+        	sendActionbarReflect(player, message);
+        	return;
+        } else if (version < 8) {
+        	// no action bar support
+        	return;
+        }
+        
+		player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+	}
+	
+	private void sendActionbarReflect(final Player player, final String message) {
+		String packageName = this.getServer().getClass().getPackage().getName();
+		String version = packageName.substring(packageName.lastIndexOf('.') + 1);
+		
+		try {
+			Object ichatbasecomponent = Class.forName("net.minecraft.server." + version + ".IChatBaseComponent.ChatSerializer").getDeclaredMethod("a", String.class).invoke(null, "{\"text\": \"" + CC(message) + "\"}");
+			Object packet = Class.forName("net.minecraft.server." + version + ".PacketPlayOutChat").getConstructor(Class.forName("net.minecraft.server." + version + ".IChatBaseComponent"), byte.class).newInstance(ichatbasecomponent, (byte) 2);
+			
+			Object craftPlayer = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer").cast(player);
+			Object nmsPlayer = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer").getMethod("getHandle").invoke(craftPlayer);
+			Object pCon = Class.forName("net.minecraft.server." + version + ".EntityPlayer").getField("playerConnection").get(nmsPlayer);
+
+			Class.forName("net.minecraft.server." + version + ".PlayerConnection").getMethod("sendPacket", Class.forName("net.minecraft.server." + version + ".Packet")).invoke(pCon, packet);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
