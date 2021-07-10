@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
  * @author Linus122
  * @since 1.9.6.1
  */
+@FunctionalInterface
 public interface ActionBarUtils {
 	/**
 	 * Sends an actionbar message to the specified player.
