@@ -1,10 +1,16 @@
 package de.Linus122.TimeIsMoney;
 
-import com.earth2me.essentials.api.Economy;
-import com.google.common.primitives.Doubles;
+import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
-import net.milkbowl.vault.economy.EconomyResponse;
-import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,6 +21,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -22,30 +30,21 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.TreeMap;
-import java.util.UUID;
+import com.earth2me.essentials.api.Economy;
+import com.google.common.primitives.Doubles;
 
-import static de.Linus122.TimeIsMoney.tools.Utils.CC;
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+import xyz.spaceio.spacegui.SpaceGUI;
+import xyz.spaceio.spaceitem.DecorationMaterial;
+import xyz.spaceio.spaceitem.SpaceItem;
 
 /**
  * ATM listener and command executor.
@@ -71,7 +70,11 @@ public class ATM implements Listener, CommandExecutor {
 	 */
 	private double[] worths = new double[4];
 	
+	private File guiFile = new File("plugins/TimeIsMoney/atm_gui.yml");
+	
 	private List<Inventory> openATMs = new ArrayList<Inventory>();
+	
+	private SpaceGUI gui;
 	
 	/**
 	 * Creates a new atm instance with the {@link de.Linus122.TimeIsMoney.Main} class.
@@ -81,7 +84,69 @@ public class ATM implements Listener, CommandExecutor {
 	public ATM(Main plugin) {
 		this.plugin = plugin;
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+		
+		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
+		
+		gui = new SpaceGUI().title("§cATM").size(9*3).fillBackground(new SpaceItem().setStack(DecorationMaterial.BACKGROUND_GRAY));
+		
+		FileConfiguration fileConfig = new YamlConfiguration();
+	
+		if(guiFile.exists()) {
+			try {
+				fileConfig.load(guiFile);
+				gui = (SpaceGUI) fileConfig.get("atm");
+			} catch (IOException | InvalidConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
+		// balance item
+		SpaceItem balanceItem = gui.getOrCreateItem(new SpaceItem().setStack(Material.GOLD_NUGGET, 1, CC("&cBalance &a%s")).setLabel("balance"), 4 + 9)
+			.addAction((p, action) -> {
+				ATM.withdrawBank(p, 10);
+			})
+			.setFormat((p) -> 
+				Main.economy.format(ATM.getBankBalance(p))
+			);
+		
+		Material[] mats = new Material[] {Material.getMaterial("CLAY_BRICK") == null ? Material.getMaterial("BRICK") : Material.getMaterial("CLAY_BRICK"), Material.IRON_INGOT, Material.GOLD_INGOT, Material.DIAMOND};
+		for(int i = 0; i < 4; i++) {
+			final int index = i;
+			
+			gui.getOrCreateItem(new SpaceItem().setStack(mats[i], 1, CC("&cWithdraw &a%s")).setLabel("witdraw-" + i), 3 - i + 9)
+			.addAction((p, action) -> {
+				ATM.interactWithdraw(p, worths[index]);
+				action.getView().update(balanceItem);
+			})
+			.setFormat((p) -> Main.economy.format(worths[index]));	
+		}
+		for(int i = 0; i < 4; i++) {
+			final int index = i;
+			
+			gui.getOrCreateItem(new SpaceItem().setStack(mats[i], 1, CC("&cDeposit &a%s")).setLabel("deposit-" + i), 5 + i + 9)
+			.addAction((p, action) -> {
+				ATM.interactDeposit(p, worths[index]);
+				action.getView().update(balanceItem);
+			})
+			.setFormat((p) -> Main.economy.format(worths[index]));	
+		}
+	
+		
+		if(!fileConfig.contains("atm")) {
+			try {
+				fileConfig.set("atm", gui);
+				fileConfig.save(guiFile);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	
+		
 		plugin.getCommand("atm").setExecutor(this);
+		
+		
 		
 		if (!bankAccountsFile.exists()) {
 			try {
@@ -92,7 +157,28 @@ public class ATM implements Listener, CommandExecutor {
 		}
 		bankAccountsConfig = YamlConfiguration.loadConfiguration(bankAccountsFile);
 		
-		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
+
+	}
+	private static void interactWithdraw(Player p, double amount) {
+		if (ATM.bankHas(p, amount)) {
+			EconomyResponse response = Main.economy.depositPlayer(p, amount);
+			if (response.type == ResponseType.SUCCESS) {
+				ATM.withdrawBank(p, amount);
+				p.sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
+			}
+		} else {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
+		}
+	}
+	
+	private static void interactDeposit(Player p, double amount) {
+		if (Main.economy.has(p, amount)) {
+			ATM.depositBank(p, amount);
+			Main.economy.withdrawPlayer(p, amount);
+			p.sendMessage(CC(Main.finalconfig.getString("atm_deposit")) + " " + Main.economy.format(amount));
+		} else {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
+		}
 	}
 	
 	
@@ -183,24 +269,6 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	
 	/**
-	 * Converts the old TimeIsMoney bank data to the new format.
-	 * 
-	 * @deprecated ancient method, will be deleted soon
-	 * @param p The player to convert data for.
-	 */
-	@Deprecated
-	private static void convertOldBank(Player p) {
-		String bankString = getBankString(p, p.getWorld());
-		if (Main.economy.hasAccount(bankString)) {
-			if (Main.economy.getBalance(bankString) > 0) {
-				p.sendMessage(CC("&aSuccessfully converted your old TIM-Bank to new version!"));
-				depositBank(p, Main.economy.getBalance(bankString));
-				Main.economy.withdrawPlayer(bankString, Main.economy.getBalance(bankString));
-			}
-		}
-	}
-	
-	/**
 	 * Gets the bank string for the specified player.
 	 * Converts old bank accounts (those saved using the user name) to new bank accounts using UUID's.
 	 *
@@ -270,55 +338,6 @@ public class ATM implements Listener, CommandExecutor {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
-	@EventHandler
-	public void onClick(InventoryClickEvent e) {
-		try {
-			if (e == null || e.getInventory() == null) return;
-			if (openATMs.contains(e.getView().getTopInventory())) {
-				e.setResult(Result.DENY);
-				Player p = (Player) e.getWhoClicked();
-				//e.setCancelled(true);
-				if (e.getCurrentItem() != null) {
-					// left side
-					if (e.getSlot() < 4) {
-						double amount = worths[3 - e.getSlot()];
-						
-						if (ATM.bankHas(p, amount)) {
-							EconomyResponse response = Main.economy.depositPlayer(p, amount);
-							if (response.type == ResponseType.SUCCESS) {
-								ATM.withdrawBank(p, amount);
-								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
-							}
-						} else {
-							e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
-						}
-					} else {
-						// right side
-						if (e.getSlot() > 4) {
-							double amount = worths[3 - (3 - (e.getSlot() - 5))];
-							
-							if (Main.economy.has((Player) e.getWhoClicked(), amount)) {
-								ATM.depositBank(p, amount);
-								Main.economy.withdrawPlayer((Player) e.getWhoClicked(), amount);
-								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("atm_deposit")) + " " + Main.economy.format(amount));
-							} else {
-								e.getWhoClicked().sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
-							}
-						}
-					}
-					// updating atm balance
-					ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
-					ItemMeta im = is.getItemMeta();
-					im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(p)));
-					is.setItemMeta(im);
-					e.getInventory().setItem(4, is);
-				}
-			}
-		} catch (Exception ignored) {
-		}
-	}
-	
 	/**
 	 * Opens the atm gui for the specified player.
 	 *
@@ -329,72 +348,7 @@ public class ATM implements Listener, CommandExecutor {
 			player.sendMessage("§cError in config.yml: atm_worth_gradation is empty.");
 			return;
 		}
-		convertOldBank(player);
-		Inventory atm_gui = Bukkit.createInventory(null, 9, CC(Main.finalconfig.getString("atm_title")));
-		
-		// Balance
-		ItemStack is = new ItemStack(Material.GOLD_NUGGET, 1);
-		ItemMeta im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_balance")) + " " + Main.economy.format(ATM.getBankBalance(player)));
-		is.setItemMeta(im);
-		atm_gui.setItem(4, is);
-		
-		// Withdraw
-		is = new ItemStack(Material.getMaterial("CLAY_BRICK"), 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[0]));
-		is.setItemMeta(im);
-		atm_gui.setItem(3, is);
-		
-		is = new ItemStack(Material.IRON_INGOT, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[1]));
-		is.setItemMeta(im);
-		atm_gui.setItem(2, is);
-		
-		is = new ItemStack(Material.GOLD_INGOT, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[2]));
-		is.setItemMeta(im);
-		atm_gui.setItem(1, is);
-		
-		is = new ItemStack(Material.DIAMOND, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_withdraw") + " &a") + Main.economy.format(worths[3]));
-		is.setItemMeta(im);
-		atm_gui.setItem(0, is);
-		
-		// Deposit
-		is = new ItemStack(Material.getMaterial("CLAY_BRICK"), 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[0]));
-		is.setItemMeta(im);
-		atm_gui.setItem(5, is);
-		
-		//
-		is = new ItemStack(Material.IRON_INGOT, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[1]));
-		is.setItemMeta(im);
-		atm_gui.setItem(6, is);
-		
-		//
-		is = new ItemStack(Material.GOLD_INGOT, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[2]));
-		is.setItemMeta(im);
-		atm_gui.setItem(7, is);
-		
-		//
-		is = new ItemStack(Material.DIAMOND, 1);
-		im = is.getItemMeta();
-		im.setDisplayName(CC(Main.finalconfig.getString("atm_deposit") + " &4") + Main.economy.format(worths[3]));
-		is.setItemMeta(im);
-		atm_gui.setItem(8, is);
-		
-		
-		openATMs.add(atm_gui);
-		player.openInventory(atm_gui);
+		gui.open(player);
 	}
 	
 	@EventHandler

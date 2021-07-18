@@ -3,10 +3,11 @@ package de.Linus122.TimeIsMoney;
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,11 +33,12 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.earth2me.essentials.Essentials;
 
-import de.Linus122.TimeIsMoney.tools.ActionBarUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+import xyz.spaceio.spacegui.GUIProvider;
+import xyz.spaceio.spacegui.SpaceGUI;
 
 /**
  * The main class for TimeIsMoney
@@ -95,12 +97,15 @@ public class Main extends JavaPlugin {
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings({"deprecation", "unchecked"})
+	@SuppressWarnings({"deprecation"})
 	@Override
 	public void onEnable() {
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
-		this.reloadConfig();
+		
+		GUIProvider.registerPlugin(this);
+		//this.reloadConfig();
+	
 		
 		File config = new File("plugins/TimeIsMoney/config.yml");
 		
@@ -196,6 +201,7 @@ public class Main extends JavaPlugin {
 	void reload() {
 		this.reloadConfig();
 		finalconfig = this.getConfig();
+		if (getConfig().getBoolean("enable_atm")) new ATM(this);
 		loadPayouts();
 	}
 	
@@ -272,7 +278,6 @@ public class Main extends JavaPlugin {
 	 *
 	 * @param p The player to pay.
 	 */
-	@SuppressWarnings("deprecation")
 	private void pay(Player p) {
 		if (p == null) return;
 		
