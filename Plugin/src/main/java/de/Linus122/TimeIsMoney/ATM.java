@@ -164,7 +164,7 @@ public class ATM implements Listener, CommandExecutor {
 			EconomyResponse response = Main.economy.depositPlayer(p, amount);
 			if (response.type == ResponseType.SUCCESS) {
 				ATM.withdrawBank(p, amount);
-				p.sendMessage(CC(Main.finalconfig.getString("atm_withdraw")) + " " + Main.economy.format(amount));
+				p.sendMessage(String.format(CC(Main.finalconfig.getString("message_atm_withdrew")), Main.economy.format(amount)));
 			}
 		} else {
 			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
@@ -175,7 +175,7 @@ public class ATM implements Listener, CommandExecutor {
 		if (Main.economy.has(p, amount)) {
 			ATM.depositBank(p, amount);
 			Main.economy.withdrawPlayer(p, amount);
-			p.sendMessage(CC(Main.finalconfig.getString("atm_deposit")) + " " + Main.economy.format(amount));
+			p.sendMessage(String.format(CC(Main.finalconfig.getString("message_atm_deposited")), Main.economy.format(amount)));
 		} else {
 			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
 		}
