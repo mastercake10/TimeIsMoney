@@ -156,7 +156,7 @@ public class Main extends JavaPlugin {
 		
 		loadPayouts();
 		
-		if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
+		if (Bukkit.getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
 			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
 		new Metrics(this);
@@ -338,7 +338,7 @@ public class Main extends JavaPlugin {
 		double afkPercent = 0.0D;
 		if (!p.hasPermission("tim.afkbypass")) {
 			//ESENTIALS_AFK_FEATURE
-			if (Bukkit.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+			if (Bukkit.getServer().getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
 				Essentials essentials = (com.earth2me.essentials.Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
 				if (essentials.getUser(p).isAfk()) {
 					afk = true;

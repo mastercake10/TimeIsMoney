@@ -11,6 +11,8 @@ disabled_in_worlds:
 afk_payout: false
 # If afk payout is enabled, what percent should be paid out?
 afk_payout_percent: 10
+# Will use essential's AFK feature if available
+afk_use_essentials: true
 
 display-messages-in-chat: true
 display-messages-in-actionbar: true
