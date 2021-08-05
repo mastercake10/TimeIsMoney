@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.Linus122.TimeIsMoney</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.9.6.19</version>
+		<version>1.9.6.20</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -47,6 +47,12 @@
 									<include>xyz.spaceio:SpaceGUI</include>
 								</includes>
 							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>xyz.spaceio</pattern>
+									<shadedPattern>de.Linus122.net.xyz.spaceio</shadedPattern>
+								</relocation>
+							</relocations>
 						</configuration>
 					</execution>
 				</executions>
@@ -92,7 +98,7 @@
 		<dependency>
 			<groupId>xyz.spaceio</groupId>
 			<artifactId>SpaceGUI</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
