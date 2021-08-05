@@ -103,9 +103,6 @@ public class ATM implements Listener, CommandExecutor {
 		
 		// balance item
 		SpaceItem balanceItem = gui.getOrCreateItem(new SpaceItem().setStack(Material.GOLD_NUGGET, 1, CC("&cBalance &a%s")).setLabel("balance"), 4 + 9)
-			.addAction((p, action) -> {
-				ATM.withdrawBank(p, 10);
-			})
 			.setFormat((p) -> 
 				Main.economy.format(ATM.getBankBalance(p))
 			);
