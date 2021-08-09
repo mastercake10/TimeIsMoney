@@ -62,7 +62,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<outputDirectory>${dir}</outputDirectory>
-					<finalName>${project.parent.name}-${project.version}</finalName>
+					<finalName>${project.parent.name}-1.15.26-SNAPSHOT</finalName>
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
 					</archive>
@@ -98,7 +98,7 @@
 		<dependency>
 			<groupId>xyz.spaceio</groupId>
 			<artifactId>SpaceGUI</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
