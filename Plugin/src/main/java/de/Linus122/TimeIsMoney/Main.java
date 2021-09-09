@@ -511,8 +511,8 @@ public class Main extends JavaPlugin {
 	private void sendSingleActionbarMessage(final Player player, final String message) {
 		String packageName = this.getServer().getClass().getPackage().getName();
         int version = Integer.parseInt(packageName.substring(packageName.lastIndexOf('.') + 1).split("_")[1]);
-        if(version == 8) {
-        	// 1_8_R*
+        if(version == 8 || version == 9) {
+        	// 1_8 -> 1_9
         	sendActionbarReflect(player, message);
         	return;
         } else if (version < 8) {
@@ -528,7 +528,7 @@ public class Main extends JavaPlugin {
 		String version = packageName.substring(packageName.lastIndexOf('.') + 1);
 		
 		try {
-			Object ichatbasecomponent = Class.forName("net.minecraft.server." + version + ".IChatBaseComponent.ChatSerializer").getDeclaredMethod("a", String.class).invoke(null, "{\"text\": \"" + CC(message) + "\"}");
+			Object ichatbasecomponent = Class.forName("net.minecraft.server." + version + ".IChatBaseComponent$ChatSerializer").getDeclaredMethod("a", String.class).invoke(null, "{\"text\": \"" + CC(message) + "\"}");
 			Object packet = Class.forName("net.minecraft.server." + version + ".PacketPlayOutChat").getConstructor(Class.forName("net.minecraft.server." + version + ".IChatBaseComponent"), byte.class).newInstance(ichatbasecomponent, (byte) 2);
 			
 			Object craftPlayer = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer").cast(player);
