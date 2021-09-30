@@ -325,7 +325,7 @@ public class Main extends JavaPlugin {
 			}
 		}
 		
-		if (!finalconfig.getBoolean("allow-multiple-accounts")) {
+		if (!finalconfig.getBoolean("allow-multiple-accounts") && !p.hasPermission("tim.multipleaccountsbypass")) {
 			int same_address_count = (int) Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostString().equals(p.getAddress().getHostString())).count();
 			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
 				sendMessage(p, finalconfig.getString("message_multiple_ips"));
