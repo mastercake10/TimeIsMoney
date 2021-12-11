@@ -16,8 +16,8 @@
     </properties>
 
     <modules>
-        <module>Plugin</module>
         <module>Tools</module>
+        <module>Plugin</module>
     </modules>
 
     <repositories>
