@@ -37,6 +37,11 @@
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+     	<!-- SpaceIO repository -->
+		<repository>
+			<id>spaceio-repo</id>
+			<url>https://repo.spaceio.xyz/repository/maven-public/</url>
+		</repository>
     </repositories>
 
     <build>
