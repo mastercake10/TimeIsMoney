@@ -1,12 +1,11 @@
 package de.Linus122.TimeIsMoney;
 
 import static de.Linus122.TimeIsMoney.tools.Utils.CC;
+import static de.Linus122.TimeIsMoney.tools.Utils.applyPlaceholders;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -35,10 +34,11 @@ import com.earth2me.essentials.Essentials;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
+
 import xyz.spaceio.spacegui.GUIProvider;
-import xyz.spaceio.spacegui.SpaceGUI;
 
 /**
  * The main class for TimeIsMoney
@@ -402,7 +402,7 @@ public class Main extends JavaPlugin {
 				sendActionbar(p, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
 			}
 			for (String cmd : payout.commands) {
-				dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
+				dispatchCommandSync(applyPlaceholders(p, cmd.replace("/", "").replaceAll("%player%", p.getName())));
 			}
 		} else {
 			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout")) {
@@ -412,7 +412,7 @@ public class Main extends JavaPlugin {
 				sendActionbar(p, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
 			for (String cmd : payout.commands_if_afk) {
-				dispatchCommandSync(cmd.replace("/", "").replaceAll("%player%", p.getName()));
+				dispatchCommandSync(applyPlaceholders(p, cmd.replace("/", "").replaceAll("%player%", p.getName())));
 			}
 		}
 		
@@ -478,13 +478,13 @@ public class Main extends JavaPlugin {
 	/**
 	 * Sends a chat message that supports color codes to the specified player.
 	 *
-	 * @param p The player to send the chat message to.
+	 * @param player The player to send the chat message to.
 	 * @param msg The message the chat should give the player.
 	 */
-	private void sendMessage(Player p, String msg) {
+	private void sendMessage(Player player, String msg) {
 		if (msg == null) return;
 		if (msg.length() == 0) return;
-		p.sendMessage(CC(msg));
+		player.sendMessage(applyPlaceholders(player, CC(msg)));
 	}
 
 	/**
@@ -497,13 +497,13 @@ public class Main extends JavaPlugin {
 		if (message.length() == 0) return;
 		int times = finalconfig.getInt("display-messages-in-actionbar-time");
 		if (times == 1) {
-			sendSingleActionbarMessage(player, CC(message));
+			sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message)));
 		} else if (times > 1) {
-			sendSingleActionbarMessage(player, CC(message));
+			sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message)));
 			
 			times--;
 			for (int i = 0; i < times; i++) {
-				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> sendSingleActionbarMessage(player, CC(message)), 20L * i);
+				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message))), 20L * i);
 			}
 		}
 	}

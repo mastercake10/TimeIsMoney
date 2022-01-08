@@ -1,6 +1,8 @@
 package de.Linus122.TimeIsMoney.tools;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 /**
  * Utility class.
@@ -28,5 +30,12 @@ public class Utils {
 			return "";
 		}
 		return ChatColor.translateAlternateColorCodes('&', s);
+	}
+	
+	public static String applyPlaceholders(Player player, String s) {
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        	s = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, s);
+        }
+        return s;
 	}
 }
