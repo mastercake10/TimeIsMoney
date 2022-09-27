@@ -10,19 +10,23 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import de.Linus122.TimeIsMoney.data.MySQLPluginData;
+import de.Linus122.TimeIsMoney.data.PlayerData;
+import de.Linus122.TimeIsMoney.data.PluginData;
+import de.Linus122.TimeIsMoney.data.YamlPluginData;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -77,22 +81,20 @@ public class Main extends JavaPlugin {
 	 */
 	private Set<UUID> payoutLimitReached = new HashSet<>();
 	/**
-	 * The time online in seconds of each player by UUID.
-	 */
-	private final HashMap<UUID, Integer> onlineSeconds = new HashMap<>();
-	/**
 	 * The last location of each player by UUID.
 	 */
 	private final HashMap<UUID, Location> lastLocation = new HashMap<>();
 	/**
-	 * The console logger.
+	 * The plugin logger.
 	 */
-	private final ConsoleCommandSender clogger = this.getServer().getConsoleSender();
+	private final Logger logger = this.getLogger();
 	
 	/**
 	 * Main task for keeping track of player's online time
 	 */
 	private BukkitTask playtimeWatcherTask;
+
+	private PluginData pluginData;
 	
 	/**
 	 * {@inheritDoc}
@@ -100,6 +102,7 @@ public class Main extends JavaPlugin {
 	@SuppressWarnings({"deprecation"})
 	@Override
 	public void onEnable() {
+
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
 		
@@ -114,8 +117,8 @@ public class Main extends JavaPlugin {
 			String old_config = "config_old " + cfg.getInt("configuration-version") + ".yml";
 			if (cfg.contains("configuration-version")) {
 				if (cfg.getInt("configuration-version") < CFG_VERSION) {
-					clogger.sendMessage(CC("[TimeIsMoney] &cYOU ARE USING AN OLD CONFIG-VERSION. The plugin CANT work with this."));
-					clogger.sendMessage(CC("[TimeIsMoney] &cI have created an new config for you. The old one is saved as config_old.yml."));
+					logger.warning("[TimeIsMoney] &cYOU ARE USING AN OLD CONFIG-VERSION. The plugin CANT work with this.");
+					logger.warning("[TimeIsMoney] &cI have created an new config for you. The old one is saved as config_old.yml.");
 					config.renameTo(new File("plugins/TimeIsMoney/" + old_config));
 				}
 			}
@@ -130,11 +133,16 @@ public class Main extends JavaPlugin {
 		}
 		
 		finalconfig = this.getConfig();
+
+		if (this.getConfig().getBoolean("debug-log")) {
+			// enable debug level
+			getLogger().setLevel(Level.ALL);
+		}
 		
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
-		
+
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
-		
+
 		startPlaytimeWatcher();
 		
 		// Placeholder API
@@ -142,46 +150,49 @@ public class Main extends JavaPlugin {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
         	new NamePlaceholder(this).register();
         }
-		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-			if (PluginData.getLastRefreshDay() != new Date().getDay() && PluginData.getPayedMoney().size() > 0) { //Next day, clear payouts!
-				log("Cleared all payouts for last day");
-				PluginData.getPayedMoney().clear();
-				PluginData.setLastRefreshDay(new Date().getDay());
-			}
-		}, 20L * 60, 20L * 60 * 15);
+
 		setupEconomy();
-		
-		PluginData.loadData();
+
+		if (getConfig().contains("mysql")) {
+			pluginData = new MySQLPluginData(this, getConfig().getString("mysql.host"),
+					getConfig().getInt("mysql.port"), getConfig().getString("mysql.user"),
+					getConfig().getString("mysql.database"), getConfig().getString("mysql.password"));
+
+			pluginData.loadData();
+		} else {
+			pluginData = new YamlPluginData(this);
+			pluginData.loadData();
+		}
+
+		this.getServer().getPluginManager().registerEvents(new Listeners(this), this);
 		
 		loadPayouts();
 		
 		if (Bukkit.getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
-			clogger.sendMessage("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
+			logger.info("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
 		new Metrics(this);
 		
-		clogger.sendMessage(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
+		logger.info(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
 	}
 	
 	public void startPlaytimeWatcher() {
 		playtimeWatcherTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
-			try {
-				for (Player p : Bukkit.getOnlinePlayers()) {
-					if (disabledWorlds.contains(p.getWorld().getName())) continue;
-					
-					if (onlineSeconds.containsKey(p.getUniqueId())) {
-						
-						onlineSeconds.put(p.getUniqueId(), onlineSeconds.get(p.getUniqueId()) + 1);
-					} else {
-						onlineSeconds.put(p.getUniqueId(), 1);
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				if (disabledWorlds.contains(player.getWorld().getName())) continue;
+				PlayerData playerData = this.pluginData.getPlayerData(player);
+
+				playerData.setSecondsSinceLastPayout(playerData.getSecondsSinceLastPayout() + 1);
+				if (playerData.getSecondsSinceLastPayout() >= getConfig().getInt("give_money_every_second")) {
+					// new payout triggered, handling the payout
+					pay(player);
+
+					if(this.pluginData instanceof MySQLPluginData) {
+						// let other servers know of this payout
+						((MySQLPluginData) this.pluginData).createPendingPayout(player);
 					}
-					if (onlineSeconds.get(p.getUniqueId()) >=  getConfig().getInt("give_money_every_second")) {
-						pay(p);
-						onlineSeconds.remove(p.getUniqueId());
-					}
+					playerData.setSecondsSinceLastPayout(0);
 				}
-			} catch (NullPointerException ignored) {
 			}
 		}, 20L, 20L);
 	}
@@ -192,11 +203,13 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		playtimeWatcherTask.cancel();
-		PluginData.saveData();
+
+		this.pluginData.saveData();
+
 	}
 
 	/**
-	 * Reloads TimeIsMoney.
+	 * Reloads TimeIsMoney
 	 */
 	void reload() {
 		this.reloadConfig();
@@ -230,9 +243,9 @@ public class Main extends JavaPlugin {
 				}
 				payouts.add(payout);
 			}
-			clogger.sendMessage(CC("[TimeIsMoney] &aLoaded " + finalconfig.getConfigurationSection("payouts").getKeys(false).size() + " Payouts!"));
+			logger.info("[TimeIsMoney] &aLoaded " + finalconfig.getConfigurationSection("payouts").getKeys(false).size() + " Payouts!");
 		} catch (Exception e) {
-			clogger.sendMessage(CC("[TimeIsMoney] &aFailed to load Payouts! (May made a mistake in config.yml?)"));
+			logger.info("[TimeIsMoney] &aFailed to load Payouts! (May made a mistake in config.yml?)");
 		}
 	}
 	
@@ -267,27 +280,25 @@ public class Main extends JavaPlugin {
 			for (Payout payout : payouts) {
 				for (int i = 0; i < payout.chance; i++) list.add(payout);
 			}
-			List<Payout> returnlist = new ArrayList<>();
-			returnlist.add(list.get(rnd.nextInt(list.size() - 1)));
-			return returnlist;
+			List<Payout> payoutList = new ArrayList<>();
+			payoutList.add(list.get(rnd.nextInt(list.size() - 1)));
+			return payoutList;
 		}
 	}
 	
 	/**
 	 * Pays the specified player.
 	 *
-	 * @param p The player to pay.
+	 * @param player The player to pay.
 	 */
-	private void pay(Player p) {
-		if (p == null) return;
+	public void pay(Player player) {
+		if (player == null) return;
+
+		PlayerData playerData = this.pluginData.getPlayerData(player);
 		
 		//REACHED MAX PAYOUT CHECK
-		double payed = 0;
-		if (PluginData.getPayedMoney().containsKey(p.getName())) {
-			payed = PluginData.getPayedMoney().get(p.getName());
-		}
-		
-		List<Payout> applicablePayouts = this.getApplicablePayoutsForPlayer(p);
+
+		List<Payout> applicablePayouts = this.getApplicablePayoutsForPlayer(player);
 		if (applicablePayouts.size() == 0) {
 			return;
 		}
@@ -307,28 +318,28 @@ public class Main extends JavaPlugin {
 		}
 
 		if (payout.max_payout_per_day != -1) {
-			if (payed >= payout.max_payout_per_day) { //Reached max payout
+			if (playerData.getReceivedToday() >= payout.max_payout_per_day) { //Reached max payout
 				
-				if(finalconfig.getBoolean("display-payout-limit-reached-message-once") && payoutLimitReached.contains(p.getUniqueId())) {
+				if(finalconfig.getBoolean("display-payout-limit-reached-message-once") && payoutLimitReached.contains(player.getUniqueId())) {
 					return;
 				}
 				
 				if (finalconfig.getBoolean("display-messages-in-chat")) {
-					sendMessage(p, finalconfig.getString("message_payoutlimit_reached"));
+					sendMessage(player, finalconfig.getString("message_payoutlimit_reached"));
 				}
 				if (finalconfig.getBoolean("display-messages-in-actionbar")) {
-					sendActionbar(p, finalconfig.getString("message_payoutlimit_reached_actionbar"));
+					sendActionbar(player, finalconfig.getString("message_payoutlimit_reached_actionbar"));
 				}
 				if(finalconfig.getBoolean("display-payout-limit-reached-message-once"))
-					payoutLimitReached.add(p.getUniqueId());
+					payoutLimitReached.add(player.getUniqueId());
 				return;
 			}
 		}
 		
-		if (!finalconfig.getBoolean("allow-multiple-accounts") && !p.hasPermission("tim.multipleaccountsbypass")) {
-			int same_address_count = (int) Bukkit.getOnlinePlayers().stream().filter(player -> player.getAddress().getHostString().equals(p.getAddress().getHostString())).count();
+		if (!finalconfig.getBoolean("allow-multiple-accounts") && !player.hasPermission("tim.multipleaccountsbypass")) {
+			int same_address_count = (int) Bukkit.getOnlinePlayers().stream().filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString())).count();
 			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
-				sendMessage(p, finalconfig.getString("message_multiple_ips"));
+				sendMessage(player, finalconfig.getString("message_multiple_ips"));
 				return;
 			}
 		}
@@ -336,17 +347,17 @@ public class Main extends JavaPlugin {
 		//AFK CHECK
 		boolean afk = false;
 		double afkPercent = 0.0D;
-		if (!p.hasPermission("tim.afkbypass")) {
+		if (!player.hasPermission("tim.afkbypass")) {
 			//ESENTIALS_AFK_FEATURE
 			if (Bukkit.getServer().getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
 				Essentials essentials = (com.earth2me.essentials.Essentials) Bukkit.getServer().getPluginManager().getPlugin("Essentials");
-				if (essentials.getUser(p).isAfk()) {
+				if (essentials.getUser(player).isAfk()) {
 					afk = true;
 				}
 			} else {
 				//PLUGIN_AFK_FEATURE
-				if (lastLocation.containsKey(p.getUniqueId())) { //AntiAFK
-					if (lastLocation.get(p.getUniqueId()).getX() == p.getLocation().getX() && lastLocation.get(p.getUniqueId()).getY() == p.getLocation().getY() && lastLocation.get(p.getUniqueId()).getZ() == p.getLocation().getZ() || lastLocation.get(p.getUniqueId()).getYaw() == p.getLocation().getYaw()) {
+				if (lastLocation.containsKey(player.getUniqueId())) { //AntiAFK
+					if (lastLocation.get(player.getUniqueId()).getX() == player.getLocation().getX() && lastLocation.get(player.getUniqueId()).getY() == player.getLocation().getY() && lastLocation.get(player.getUniqueId()).getZ() == player.getLocation().getZ() || lastLocation.get(player.getUniqueId()).getYaw() == player.getLocation().getYaw()) {
 						afk = true;
 					}
 				}
@@ -354,10 +365,10 @@ public class Main extends JavaPlugin {
 			if (afk) {
 				if (!finalconfig.getBoolean("afk_payout")) { // Payout is disabled
 					if (finalconfig.getBoolean("display-messages-in-chat")) {
-						sendMessage(p, finalconfig.getString("message_afk"));
+						sendMessage(player, finalconfig.getString("message_afk"));
 					}
 					if (finalconfig.getBoolean("display-messages-in-actionbar")) {
-						sendActionbar(p, finalconfig.getString("message_afk_actionbar"));
+						sendActionbar(player, finalconfig.getString("message_afk_actionbar"));
 					}
 					return;
 				} else { // Payout is enabled
@@ -383,51 +394,48 @@ public class Main extends JavaPlugin {
 		}
 		
 		if (finalconfig.getBoolean("store-money-in-bank")) {
-			ATM.depositBank(p, payout_amt);
+			ATM.depositBank(player, payout_amt);
 		} else {
 			double before = 0;
-			if (economy.hasAccount(p)) {
-				before = economy.getBalance(p);
+			if (economy.hasAccount(player)) {
+				before = economy.getBalance(player);
 			}
 			
-			economy.depositPlayer(p, payout_amt);
-			log(p.getName() + ": Deposited: " + payout_amt + " Balance-before: " + before + " Balance-now: " + economy.getBalance(p));
+			economy.depositPlayer(player, payout_amt);
+			log(player.getName() + ": Deposited: " + payout_amt + " Balance-before: " + before + " Balance-now: " + economy.getBalance(player));
 		}
 		
 		if (!afk) {
 			if (finalconfig.getBoolean("display-messages-in-chat")) {
-				sendMessage(p, CC(finalconfig.getString("message")).replace("%money%", economy.format(payout_amt)));
+				sendMessage(player, CC(finalconfig.getString("message")).replace("%money%", economy.format(payout_amt)));
 			}
 			if (finalconfig.getBoolean("display-messages-in-actionbar")) {
-				sendActionbar(p, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
+				sendActionbar(player, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
 			}
 			for (String cmd : payout.commands) {
-				dispatchCommandSync(applyPlaceholders(p, cmd.replace("/", "").replaceAll("%player%", p.getName())));
+				dispatchCommandSync(applyPlaceholders(player, cmd.replace("/", "").replaceAll("%player%", player.getName())));
 			}
 		} else {
 			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout")) {
-				sendMessage(p, CC(finalconfig.getString("message_afk_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
+				sendMessage(player, CC(finalconfig.getString("message_afk_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
 			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout")) {
-				sendActionbar(p, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
+				sendActionbar(player, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
 			for (String cmd : payout.commands_if_afk) {
-				dispatchCommandSync(applyPlaceholders(p, cmd.replace("/", "").replaceAll("%player%", p.getName())));
+				dispatchCommandSync(applyPlaceholders(player, cmd.replace("/", "").replaceAll("%player%", player.getName())));
 			}
 		}
 		
 		//ADD PAYED MONEY
-		if (PluginData.getPayedMoney().containsKey(p.getName())) {
-			PluginData.getPayedMoney().put(p.getName(), PluginData.getPayedMoney().get(p.getName()) + payout_amt);
-		} else {
-			PluginData.getPayedMoney().put(p.getName(), payout_amt);
-		}
+		playerData.setReceivedToday(playerData.getReceivedToday() + payout_amt);
+
 		
-		lastLocation.put(p.getUniqueId(), p.getLocation());
+		lastLocation.put(player.getUniqueId(), player.getLocation());
 		
 		// clear payout limit reached message
 		if(finalconfig.getBoolean("display-payout-limit-reached-message-once"))
-			payoutLimitReached.remove(p.getUniqueId());
+			payoutLimitReached.remove(player.getUniqueId());
 	}
 	
 	/**
@@ -540,5 +548,9 @@ public class Main extends JavaPlugin {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public PluginData getPluginData() {
+		return pluginData;
 	}
 }

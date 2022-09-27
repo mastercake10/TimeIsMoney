@@ -75,6 +75,15 @@ message_atm_deposited: "&2Added &a%s &2to your account."
 # Set this to true to send the payout limit reached message only one time once reached
 display-payout-limit-reached-message-once: false
 
+# uncomment to use database instead of data file
+
+#mysql:
+#  host: "127.0.0.1"
+#  user: "user"
+#  password: "pass"
+#  port: 3306
+#  database: "tim_db"
+
 # ATM -> Place down a sign with [atm] on the first line to use it!
 enable_atm: true
 # The label that is drawn on the sign upon placement (keep in mind that ATM signs are tracked using this tag, so choose something "unique")

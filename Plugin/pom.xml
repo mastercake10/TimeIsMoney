@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.Linus122.TimeIsMoney</groupId>
 		<artifactId>parent</artifactId>
-		<version>1.9.6.22</version>
+		<version>1.9.7</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -104,7 +104,13 @@
 		<dependency>
 			<groupId>de.Linus122.TimeIsMoney</groupId>
 			<artifactId>Tools</artifactId>
-			<version>1.9.6.22</version>
+			<version>1.9.7</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>
