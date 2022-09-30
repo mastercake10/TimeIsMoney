@@ -77,6 +77,8 @@ public class ATM implements Listener, CommandExecutor {
 	
 	private SpaceGUI gui;
 	
+	private Material[] mats = new Material[] {Material.getMaterial("CLAY_BRICK") == null ? Material.getMaterial("BRICK") : Material.getMaterial("CLAY_BRICK"), Material.IRON_INGOT, Material.GOLD_INGOT, Material.DIAMOND};
+	
 	/**
 	 * Creates a new atm instance with the {@link de.Linus122.TimeIsMoney.Main} class.
 	 *
@@ -100,21 +102,32 @@ public class ATM implements Listener, CommandExecutor {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		} else {
+			gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(Material.GOLD_NUGGET).setDisplayname(CC("&cBalance &a%s"))).setLabel("balance"), 4 + 9);
+			for(int i = 0; i < 4; i++) {
+				gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(mats[i]).setDisplayname(CC("&cWithdraw &a%s"))).setLabel("witdraw-" + i), 3 - i + 9);
+			}
+			for(int i = 0; i < 4; i++) {
+				gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(mats[i]).setDisplayname(CC("&cDeposit &a%s"))).setLabel("deposit-" + i), 5 + i + 9);
+			}
 		}
 		
 		// balance item
-
-		SpaceItem balanceItem = gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(Material.GOLD_NUGGET).setDisplayname(CC("&cBalance &a%s"))).setLabel("balance"), 4 + 9)
-			.setFormat((p) -> 
-				Main.economy.format(ATM.getBankBalance(p))
-			);
 		
-		Material[] mats = new Material[] {Material.getMaterial("CLAY_BRICK") == null ? Material.getMaterial("BRICK") : Material.getMaterial("CLAY_BRICK"), Material.IRON_INGOT, Material.GOLD_INGOT, Material.DIAMOND};
+
+		SpaceItem balanceItem = gui.getItemWithLabel("balance");
+		if(balanceItem != null) {
+			balanceItem.setFormat((p) -> 
+				Main.economy.format(ATM.getBankBalance(p))
+			);	
+		}
+		
 		for(int i = 0; i < 4; i++) {
 			final int index = i;
-			gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(mats[i]).setDisplayname(CC("&cWithdraw &a%s"))).setLabel("witdraw-" + i), 3 - i + 9)
+			SpaceItem item = gui.getItemWithLabel("witdraw-" + i);
+			if(item == null) continue;
 			
-			.addAction((p, action) -> {
+			item.addAction((p, action) -> {
 				ATM.interactWithdraw(p, worths[index]);
 				action.getView().update(balanceItem);
 			})
@@ -122,9 +135,10 @@ public class ATM implements Listener, CommandExecutor {
 		}
 		for(int i = 0; i < 4; i++) {
 			final int index = i;
-			gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(mats[i]).setDisplayname(CC("&cDeposit &a%s"))).setLabel("deposit-" + i), 5 + i + 9)
-
-			.addAction((p, action) -> {
+			SpaceItem item = gui.getItemWithLabel("deposit-" + i);
+			if(item == null) continue;
+			
+			item.addAction((p, action) -> {
 				ATM.interactDeposit(p, worths[index]);
 				action.getView().update(balanceItem);
 			})
