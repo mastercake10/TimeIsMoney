@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -239,7 +240,7 @@ public class Main extends JavaPlugin {
 				}
 				
 				if (finalconfig.isSet("payouts." + key + ".chance")) {
-					payout.chance = finalconfig.getInt("payouts." + key + ".chance");
+					payout.chance = finalconfig.getDouble("payouts." + key + ".chance");
 				}
 				payouts.add(payout);
 			}
@@ -276,14 +277,18 @@ public class Main extends JavaPlugin {
 		}else {
 			// Get a random payout
 			Random rnd = new Random();
-			List<Payout> list = new ArrayList<>();
+			
+			double d = rnd.nextDouble() * 100;
+			
 			for (Payout payout : payouts) {
-				for (int i = 0; i < payout.chance; i++) list.add(payout);
+				if(payout.chance == 0.0) continue;
+				if ((d -= payout.chance) < 0){
+					return Collections.singletonList(payout);
+				}
 			}
-			List<Payout> payoutList = new ArrayList<>();
-			payoutList.add(list.get(rnd.nextInt(list.size() - 1)));
-			return payoutList;
+			
 		}
+		return Collections.emptyList(); 
 	}
 	
 	/**

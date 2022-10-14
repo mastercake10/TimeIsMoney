@@ -25,7 +25,7 @@ class Payout {
 	/**
 	 * The chance of getting the payout.
 	 */
-	int chance = 0;
+	double chance = 0;
 	/**
 	 * The list of commands to execute if this payout is earned.
 	 */
