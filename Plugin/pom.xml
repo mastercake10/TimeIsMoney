@@ -45,6 +45,7 @@
 								<includes>
 									<include>de.Linus122.TimeIsMoney:*</include>
 									<include>xyz.spaceio:SpaceGUI</include>
+									<include>xyz.spaceio:Metrics</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -100,6 +101,12 @@
 			<artifactId>SpaceGUI</artifactId>
 			<version>0.0.4-SNAPSHOT</version>
 			<scope>compile</scope>
+		</dependency>
+		<!--SpaceIO Metrics -->
+		<dependency>
+			<groupId>xyz.spaceio</groupId>
+			<artifactId>Metrics</artifactId>
+			<version>0.08-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>de.Linus122.TimeIsMoney</groupId>
