@@ -321,12 +321,13 @@ public class ATM implements Listener, CommandExecutor {
 		return prefix + "_TimBANK";
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.NORMAL)
 	public void onInteract(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equalsIgnoreCase(CC(Main.finalconfig.getString("atm_sign_label")))) {
+					e.setCancelled(true);
 					if (!e.getPlayer().hasPermission("tim.atm.use")) {
 						e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_noperms")));
 					} else {
