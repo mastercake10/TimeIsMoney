@@ -29,6 +29,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -327,11 +328,13 @@ public class ATM implements Listener, CommandExecutor {
 			if (e.getClickedBlock().getState() instanceof Sign) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equalsIgnoreCase(CC(Main.finalconfig.getString("atm_sign_label")))) {
-					e.setCancelled(true);
-					if (!e.getPlayer().hasPermission("tim.atm.use")) {
-						e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_noperms")));
-					} else {
-						this.openGUI(e.getPlayer());
+					if(e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+						e.setCancelled(true);
+						if (!e.getPlayer().hasPermission("tim.atm.use")) {
+							e.getPlayer().sendMessage(CC(Main.finalconfig.getString("message_atm_noperms")));
+						} else {
+							this.openGUI(e.getPlayer());
+						}
 					}
 				}
 			}
