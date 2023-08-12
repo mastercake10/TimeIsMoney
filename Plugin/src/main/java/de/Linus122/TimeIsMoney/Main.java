@@ -398,7 +398,7 @@ public class Main extends JavaPlugin {
 				return;
 			}
 		}
-		
+
 		if (finalconfig.getBoolean("store-money-in-bank")) {
 			ATM.depositBank(player, payout_amt);
 		} else {
@@ -412,20 +412,20 @@ public class Main extends JavaPlugin {
 		}
 		
 		if (!afk) {
-			if (finalconfig.getBoolean("display-messages-in-chat")) {
+			if (finalconfig.getBoolean("display-messages-in-chat") && payout_amt > 0d) {
 				sendMessage(player, CC(finalconfig.getString("message")).replace("%money%", economy.format(payout_amt)));
 			}
-			if (finalconfig.getBoolean("display-messages-in-actionbar")) {
+			if (finalconfig.getBoolean("display-messages-in-actionbar") && payout_amt > 0d) {
 				sendActionbar(player, CC(finalconfig.getString("message_actionbar")).replace("%money%", economy.format(payout_amt)));
 			}
 			for (String cmd : payout.commands) {
 				dispatchCommandSync(applyPlaceholders(player, cmd.replace("/", "").replaceAll("%player%", player.getName())));
 			}
 		} else {
-			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout")) {
+			if (finalconfig.getBoolean("display-messages-in-chat") && finalconfig.isSet("message_afk_payout") && payout_amt > 0d) {
 				sendMessage(player, CC(finalconfig.getString("message_afk_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
-			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout")) {
+			if (finalconfig.getBoolean("display-messages-in-actionbar") && finalconfig.isSet("message_afk_actionbar_payout") && payout_amt > 0d) {
 				sendActionbar(player, CC(finalconfig.getString("message_afk_actionbar_payout").replace("%money%", economy.format(payout_amt)).replace("%percent%", "" + afkPercent)));
 			}
 			for (String cmd : payout.commands_if_afk) {
