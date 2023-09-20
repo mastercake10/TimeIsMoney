@@ -1,3 +1,5 @@
+# Config generated for TimeIsMoney ${project.version}
+
 configuration-version: 12
 
 debug-log: false
@@ -60,6 +62,7 @@ payouts:
     permission: tim.vip
 
 # Translations
+# Both legacy color codes, &c etc. and hex RGB color codes, #&FF00FF, are supported.
 message: "&aYou earned &c%money% &afor 10 minutes online time!"
 message_payoutlimit_reached: "&cYou have reached the payout limit today. You earned 0$"
 message_afk: "&cYou havn't earned money because you were afk!"
