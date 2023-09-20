@@ -4,6 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Utility class.
  *
@@ -29,7 +32,7 @@ public class Utils {
 		if(s == null) {
 			return "";
 		}
-		return ChatColor.translateAlternateColorCodes('&', s);
+		return ChatColor.translateAlternateColorCodes('&', parseRGB(s));
 	}
 	
 	public static String applyPlaceholders(Player player, String s) {
@@ -37,5 +40,24 @@ public class Utils {
         	s = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, s);
         }
         return s;
+	}
+
+	private static final Pattern rgbColor = Pattern.compile("(?<!\\\\)(&#[a-fA-F0-9]{6})");
+
+	public static String parseRGB(String msg) {
+		Matcher matcher = rgbColor.matcher(msg);
+		while (matcher.find()) {
+			String color = msg.substring(matcher.start(), matcher.end());
+			String hex = color.replace("&", "");
+			try {
+				msg = msg.replace(color, String.valueOf(net.md_5.bungee.api.ChatColor.of(hex)));
+			} catch(NoSuchMethodError e) {
+				// older spigot versions
+
+				msg = msg.replace(color, "");
+			}
+			matcher = rgbColor.matcher(msg);
+		}
+		return msg;
 	}
 }
