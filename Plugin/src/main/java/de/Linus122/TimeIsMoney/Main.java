@@ -8,18 +8,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import de.Linus122.TimeIsMoney.data.MySQLPluginData;
 import de.Linus122.TimeIsMoney.data.PlayerData;
@@ -341,12 +334,21 @@ public class Main extends JavaPlugin {
 				return;
 			}
 		}
-		
+
 		if (!finalconfig.getBoolean("allow-multiple-accounts") && !player.hasPermission("tim.multipleaccountsbypass")) {
-			int same_address_count = (int) Bukkit.getOnlinePlayers().stream().filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString())).count();
+			Set<? extends Player> sameAddressPlayers = Bukkit.getOnlinePlayers().stream().filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString())).collect(Collectors.toSet());
+			int same_address_count = sameAddressPlayers.size();
+
 			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
-				sendMessage(player, finalconfig.getString("message_multiple_ips"));
-				return;
+				Optional<? extends Player> firstPlayer = sameAddressPlayers.stream().min(Comparator.comparing(Player::getName));
+
+				if (firstPlayer.isPresent()) {
+					// one of the players with multiple ips still should receive a payout
+					if (firstPlayer.get() != player) {
+						sendMessage(player, finalconfig.getString("message_multiple_ips"));
+						return;
+					}
+				}
 			}
 		}
 		

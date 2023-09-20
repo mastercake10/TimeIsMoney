@@ -20,9 +20,12 @@ display-messages-in-actionbar-time: 10
 give_money_every_second: 600
 store-money-in-bank: false
 
-# Define if multiple accounts should get payed with the same ip-address. You may disable this if your players are using multiple accounts per ip.
+# Define if multiple accounts should get paid with the same ip address.
+# You may disable this if your players are using multiple accounts per ip on purpose.
 # Can also set "tim.multipleaccountsbypass" permission to bypass this for individual players.
+# Note that one of the players that share the same ip address will still receive their payout.
 allow-multiple-accounts: true
+
 # Option to increase the maximal amount of players of the same IP getting a payout. Only applies when allow-multiple-accounts is set to false.
 max-multiple-accounts: 1
 
