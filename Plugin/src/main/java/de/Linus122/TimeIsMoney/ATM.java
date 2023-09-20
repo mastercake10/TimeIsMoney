@@ -186,6 +186,10 @@ public class ATM implements Listener, CommandExecutor {
 	}
 	
 	private static void interactDeposit(Player p, double amount) {
+		if (ATM.getBankBalance(p) >= Main.finalconfig.getDouble("atm_balance_limit", Double.MAX_VALUE)) {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_limit_reached")));
+			return;
+		}
 		if (Main.economy.has(p, amount)) {
 			ATM.depositBank(p, amount);
 			Main.economy.withdrawPlayer(p, amount);

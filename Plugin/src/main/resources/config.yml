@@ -18,6 +18,8 @@ display-messages-in-chat: true
 display-messages-in-actionbar: true
 display-messages-in-actionbar-time: 10
 give_money_every_second: 600
+
+# defines whether the money should be stored in the bank (access it using /atm or an [ATM] sign, see more below)
 store-money-in-bank: false
 
 # Define if multiple accounts should get paid with the same ip address.
@@ -74,6 +76,7 @@ message_atm_nopermbuild: "&cYou don't have permissions to build ATM's (tim.atm.p
 message_atm_created: "&2ATM created! (You can also write something in the Lines 2-4)"
 message_atm_withdrew: "&cTook &a%s &cfrom your account."
 message_atm_deposited: "&2Added &a%s &2to your account."
+message_atm_limit_reached: "&cATM limit reached! Please withdraw some money before you can receive money again."
 
 # Set this to true to send the payout limit reached message only one time once reached
 display-payout-limit-reached-message-once: false
@@ -96,6 +99,9 @@ atm_worth_gradation:
   - 100.0
   - 1000.0
   - 10000.0
+
+# Sets a limit for the max amount of money allowed inside a player's ATM.
+#atm_balance_limit: 100000000.0;
 
 # You can seperate the ATM balances for different worlds by group them. Just set group-atms to true and write atm_groups as described below.
 # Note: Existing bank accounts will be removed when enabling this feature. 

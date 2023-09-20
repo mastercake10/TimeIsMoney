@@ -402,6 +402,10 @@ public class Main extends JavaPlugin {
 		}
 
 		if (finalconfig.getBoolean("store-money-in-bank")) {
+			if(ATM.getBankBalance(player) >= finalconfig.getDouble("atm_balance_limit", Double.MAX_VALUE)) {
+				sendMessage(player, CC(finalconfig.getString("message_atm_limit_reached")));
+				return;
+			}
 			ATM.depositBank(player, payout_amt);
 		} else {
 			double before = 0;
