@@ -1,55 +1,28 @@
 package de.Linus122.TimeIsMoney.data;
 
-import org.apache.commons.lang.time.DateUtils;
-
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 
 public class PlayerData {
-
-    private double receivedToday = 0d;
-    private Date lastPayoutDate;
-    private int secondsSinceLastPayout = 0;
-
-    public PlayerData(double receivedToday, Date lastPayoutDate, int secondsSinceLastPayout) {
-        this.receivedToday = receivedToday;
-        this.lastPayoutDate = lastPayoutDate;
-        this.secondsSinceLastPayout = secondsSinceLastPayout;
-    }
-
-    public double getReceivedToday() {
-        if(lastPayoutDate == null || !DateUtils.isSameDay(lastPayoutDate, new Date())) {
-            // new day, reset total money received
-            receivedToday = 0d;
+    // stores per payout data (key as defined in config.yml)
+    private final HashMap<Integer, PayoutData> payoutData = new LinkedHashMap<>();
+    
+    public PayoutData getPayoutData(int payout_id) {
+        if(payoutData.containsKey(payout_id)) {
+            return payoutData.get(payout_id);
         }
-        return receivedToday;
+        PayoutData payoutDataEntry = new PayoutData(0, new Date(), 0);
+        
+        payoutData.put(payout_id, payoutDataEntry);
+        
+        return payoutDataEntry;
     }
 
-
-    /**
-     * Sets the total amount of money received for today and updates the {@link #lastPayoutDate} variable to now.
-     * @param receivedToday     Amount of money received today
-     * @since 1.9.7
-     */
-    public void setReceivedToday(double receivedToday) {
-        this.receivedToday = receivedToday;
-        lastPayoutDate = new Date();
-    }
-
-    public int getSecondsSinceLastPayout() {
-        return secondsSinceLastPayout;
-    }
-
-    public void setSecondsSinceLastPayout(int secondsSinceLastPayout) {
-        this.secondsSinceLastPayout = secondsSinceLastPayout;
-    }
-
-    public Date getLastPayoutDate() {
-        return lastPayoutDate;
-    }
-
-    public void setLastPayoutDate(Date lastPayoutDate) {
-        this.lastPayoutDate = lastPayoutDate;
+    public HashMap<Integer, PayoutData> getPayoutDataMap() {
+        return this.payoutData;
     }
 
 }

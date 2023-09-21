@@ -28,7 +28,7 @@ public class Listeners implements Listener {
 
             pending.forEach(k -> {
                 System.out.println("paying user from pending payout: " + k);
-                main.pay(event.getPlayer());
+                main.pay(event.getPlayer(), main.getPayouts().get(k), main.getPluginData().getPlayerData(event.getPlayer()).getPayoutData(k));
             });
 
         }

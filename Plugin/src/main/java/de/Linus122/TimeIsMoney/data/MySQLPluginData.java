@@ -31,11 +31,13 @@ public class MySQLPluginData extends PluginData{
             this.plugin.getLogger().info(String.format("MySQL connected!", host, port, database));
 
             // table for the player data
-            String sqlCreate = "CREATE TABLE IF NOT EXISTS playerData ("
-                    + "   uuid                     VARCHAR(36) PRIMARY KEY,"
+            String sqlCreate = "CREATE TABLE IF NOT EXISTS payoutData ("
+                    + "   uuid                     VARCHAR(36),"
+                    + "   id                       INT,"
                     + "   receivedToday            DOUBLE,"
                     + "   secondsSinceLastPayout   INTEGER,"
-                    + "   lastPayoutDate           DATE)";
+                    + "   lastPayoutDate           DATE,"
+                    + "   primary key (uuid, id))";
 
             Statement statement = connection.createStatement();
             statement.execute(sqlCreate);
@@ -73,19 +75,22 @@ public class MySQLPluginData extends PluginData{
     }
 
     public void savePlayerData(UUID uuid, PlayerData playerData) {
-        try {
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("REPLACE INTO playerData (uuid, receivedToday, secondsSinceLastPayout, lastPayoutDate) VALUES (?, ?, ? ,?)");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setDouble(2, playerData.getReceivedToday());
-            preparedStatement.setInt(3, playerData.getSecondsSinceLastPayout());
-            preparedStatement.setDate(4, new java.sql.Date(playerData.getLastPayoutDate().getTime()));
+        playerData.getPayoutDataMap().forEach((payoutID, payoutData) -> {
+            try {
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement("REPLACE INTO playerData (uuid, payout_id receivedToday, secondsSinceLastPayout, lastPayoutDate) VALUES (?, ?, ?, ? ,?)");
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setInt(1, payoutID);
+                preparedStatement.setDouble(2, payoutData.getReceivedToday());
+                preparedStatement.setInt(3, payoutData.getSecondsSinceLastPayout());
+                preparedStatement.setDate(4, new java.sql.Date(payoutData.getLastPayoutDate().getTime()));
 
-            preparedStatement.execute();
+                preparedStatement.execute();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -93,13 +98,12 @@ public class MySQLPluginData extends PluginData{
 
     }
 
-    private AbstractMap.Entry<UUID, PlayerData> readPlayerData(ResultSet result) throws SQLException {
-        UUID uuid = UUID.fromString(result.getString("uuid"));
+    private PayoutData readPayoutData(ResultSet result) throws SQLException {
         double receivedToday = result.getDouble("receivedToday");
         int secondsOnline = result.getInt("secondsSinceLastPayout");
         Date date = new Date(result.getDate("lastPayoutDate").getTime());
 
-        return new AbstractMap.SimpleEntry<>(uuid, new PlayerData(receivedToday, date, secondsOnline));
+        return new PayoutData(receivedToday, date, secondsOnline);
     }
 
     @Blocking
@@ -108,14 +112,16 @@ public class MySQLPluginData extends PluginData{
             return playerDataMap.get(player.getUniqueId());
         }
         try{
+            PlayerData playerData = new PlayerData();
             // get data from DB
             ResultSet result = connection.prepareStatement("SELECT * FROM playerData WHERE uuid='" + player.getUniqueId() + "'").executeQuery();
-            if(result.next()) {
-                AbstractMap.Entry<UUID, PlayerData> data = this.readPlayerData(result);
-                playerDataMap.put(data.getKey(), data.getValue());
-            } else {
-                // no entry, create new object
-                playerDataMap.put(player.getUniqueId(), new PlayerData(0, new java.util.Date(), 0));
+            while(result.next()) {
+                UUID uuid = UUID.fromString(result.getString("uuid"));
+                int payoutID = result.getInt("payout_id");
+
+                PayoutData payoutData = this.readPayoutData(result);
+                playerData.getPayoutDataMap().put(payoutID, payoutData);
+                playerDataMap.put(uuid, playerData);
             }
         } catch (SQLException e) {
             e.printStackTrace();

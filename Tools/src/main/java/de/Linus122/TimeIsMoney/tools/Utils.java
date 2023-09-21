@@ -60,4 +60,31 @@ public class Utils {
 		}
 		return msg;
 	}
+
+	/**
+	 * Return the seconds of a time format, valid suffixes are s (seconds), m (minutes) and h (hours)
+	 * @param format the formatted time, examples: 10m, 8h, 30s.
+	 * @return converted seconds, invalid return -1
+	 */
+	public static int parseTimeFormat(String format) {
+		Pattern pattern = Pattern.compile("^(?:(\\d+)s|(\\d+)m|(\\d+)h)$");
+		Matcher matcher = pattern.matcher(format);
+
+		if (matcher.matches()) {
+			String seconds = matcher.group(1);
+			String minutes = matcher.group(2);
+			String hours = matcher.group(3);
+
+			if (seconds != null) {
+				return Integer.parseInt(seconds);
+			}
+			if (minutes != null) {
+				return Integer.parseInt(minutes) * 60;
+			}
+			if (hours != null) {
+				return Integer.parseInt(hours) * 60 * 60;
+			}
+		}
+		return -1;
+	}
 }

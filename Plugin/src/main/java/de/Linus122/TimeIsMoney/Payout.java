@@ -10,6 +10,7 @@ import java.util.List;
  * @since 1.9.6.1
  */
 class Payout {
+	int id;
 	/**
 	 * The payout amount.
 	 */
@@ -34,4 +35,9 @@ class Payout {
 	 * The list of commands to execute if this payout is earned while afk.
 	 */
 	List<String> commands_if_afk = new ArrayList<>();
+
+	/**
+	 * Interval seconds
+	 */
+	int interval = 0;
 }

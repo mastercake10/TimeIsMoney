@@ -12,12 +12,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import de.Linus122.TimeIsMoney.data.MySQLPluginData;
-import de.Linus122.TimeIsMoney.data.PlayerData;
-import de.Linus122.TimeIsMoney.data.PluginData;
-import de.Linus122.TimeIsMoney.data.YamlPluginData;
+import de.Linus122.TimeIsMoney.data.*;
+import de.Linus122.TimeIsMoney.tools.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -172,22 +169,33 @@ public class Main extends JavaPlugin {
 	}
 	
 	public void startPlaytimeWatcher() {
+		String intervalString = getConfig().getString("global_interval", getConfig().getInt("give_money_every_second") + "s");
+		int globalTimerSeconds = Utils.parseTimeFormat(intervalString);
+
 		playtimeWatcherTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (disabledWorlds.contains(player.getWorld().getName())) continue;
 				PlayerData playerData = this.pluginData.getPlayerData(player);
 
-				playerData.setSecondsSinceLastPayout(playerData.getSecondsSinceLastPayout() + 1);
-				if (playerData.getSecondsSinceLastPayout() >= getConfig().getInt("give_money_every_second")) {
-					// new payout triggered, handling the payout
-					pay(player);
+				for(Payout payout : this.getApplicablePayoutsForPlayer(player)) {
+					PayoutData playerPayoutData = playerData.getPayoutData(payout.id);
+					playerPayoutData.setSecondsSinceLastPayout(playerPayoutData.getSecondsSinceLastPayout() + 1);
 
-					if(this.pluginData instanceof MySQLPluginData) {
-						// let other servers know of this payout
-						((MySQLPluginData) this.pluginData).createPendingPayout(player);
+					int intervalSeconds = payout.interval != 0 ? payout.interval : globalTimerSeconds;
+
+					if (playerPayoutData.getSecondsSinceLastPayout() >= intervalSeconds) {
+						// new payout triggered, handling the payout
+						pay(player, payout, playerPayoutData);
+
+						if(this.pluginData instanceof MySQLPluginData) {
+							// let other servers know of this payout
+							((MySQLPluginData) this.pluginData).createPendingPayout(player);
+						}
+						playerPayoutData.setSecondsSinceLastPayout(0);
 					}
-					playerData.setSecondsSinceLastPayout(0);
 				}
+
+
 			}
 		}, 20L, 20L);
 	}
@@ -221,6 +229,7 @@ public class Main extends JavaPlugin {
 			payouts.clear();
 			for (String key : finalconfig.getConfigurationSection("payouts").getKeys(false)) {
 				Payout payout = new Payout();
+				payout.id = Integer.parseInt(key);
 				payout.max_payout_per_day = finalconfig.getDouble("payouts." + key + ".max_payout_per_day");
 				payout.payout_amount = finalconfig.getDouble("payouts." + key + ".payout_amount");
 				if (finalconfig.isSet("payouts." + key + ".permission")) {
@@ -235,6 +244,10 @@ public class Main extends JavaPlugin {
 				
 				if (finalconfig.isSet("payouts." + key + ".chance")) {
 					payout.chance = finalconfig.getDouble("payouts." + key + ".chance");
+				}
+				if (finalconfig.isSet("payouts." + key + ".interval")) {
+					// TODO: Add error message when parsing failed
+					payout.interval = Utils.parseTimeFormat(finalconfig.getString("payouts." + key + ".interval"));
 				}
 				payouts.add(payout);
 			}
@@ -267,7 +280,32 @@ public class Main extends JavaPlugin {
 	private List<Payout> getApplicablePayoutsForPlayer(Player player){
 		if (!this.getConfig().getBoolean("choose-payout-by-chance")) {
 			// Choose applicable payouts by permission
-			return payouts.stream().filter(payout -> player.hasPermission(payout.permission) || payout.permission.length() == 0).collect(Collectors.toList());
+			List<Payout> payouts_ = payouts.stream().filter(payout -> player.hasPermission(payout.permission) || payout.permission.length() == 0).collect(Collectors.toList());
+
+			if(finalconfig.getBoolean("choose-only-one-payout", true)) {
+				List<Payout> finalPayouts = new ArrayList<>();
+				// add payouts with a custom timer anyways
+				finalPayouts.addAll(payouts_.stream().filter(payout -> payout.interval != 0).collect(Collectors.toList()));
+
+				// choose the last element of the payouts that does not have a custom timer
+				List<Payout> payoutsWithoutInterval = payouts_.stream().filter(payout -> payout.interval == 0).collect(Collectors.toList());
+				finalPayouts.add(payoutsWithoutInterval.get(payoutsWithoutInterval.size() - 1));
+				return finalPayouts;
+			} else if(this.getConfig().getBoolean("merge-payouts")) {
+				// Mering multiple payouts to one
+				Payout payout = new Payout();
+				payout.id = 1;
+				for (Payout payout_ : payouts_) {
+					if(payout_.interval != 0) {
+						continue;
+					}
+					payout.commands.addAll(payout_.commands);
+					payout.commands_if_afk.addAll(payout_.commands_if_afk);
+					payout.payout_amount += payout_.payout_amount;
+					payout.max_payout_per_day += payout_.max_payout_per_day;
+				}
+			}
+			return payouts_;
 		}else {
 			// Get a random payout
 			Random rnd = new Random();
@@ -290,34 +328,11 @@ public class Main extends JavaPlugin {
 	 *
 	 * @param player The player to pay.
 	 */
-	public void pay(Player player) {
+	public void pay(Player player, Payout payout, PayoutData payoutPlayerData) {
 		if (player == null) return;
 
-		PlayerData playerData = this.pluginData.getPlayerData(player);
-		
-		//REACHED MAX PAYOUT CHECK
-
-		List<Payout> applicablePayouts = this.getApplicablePayoutsForPlayer(player);
-		if (applicablePayouts.size() == 0) {
-			return;
-		}
-		
-		Payout payout = new Payout();
-		
-		if(this.getConfig().getBoolean("merge-payouts")) {
-			// Mering multiple payouts to one
-			for (Payout payout_ : applicablePayouts) {
-				payout.commands.addAll(payout_.commands);
-				payout.commands_if_afk.addAll(payout_.commands_if_afk);
-				payout.payout_amount += payout_.payout_amount;
-				payout.max_payout_per_day += payout_.max_payout_per_day;
-			}	
-		}else {
-			payout = applicablePayouts.get(applicablePayouts.size() - 1);
-		}
-
 		if (payout.max_payout_per_day != -1) {
-			if (playerData.getReceivedToday() >= payout.max_payout_per_day) { //Reached max payout
+			if (payoutPlayerData.getReceivedToday() >= payout.max_payout_per_day) { //Reached max payout
 				
 				if(finalconfig.getBoolean("display-payout-limit-reached-message-once") && payoutLimitReached.contains(player.getUniqueId())) {
 					return;
@@ -440,7 +455,7 @@ public class Main extends JavaPlugin {
 		}
 		
 		//ADD PAYED MONEY
-		playerData.setReceivedToday(playerData.getReceivedToday() + payout_amt);
+		payoutPlayerData.setReceivedToday(payoutPlayerData.getReceivedToday() + payout_amt);
 
 		
 		lastLocation.put(player.getUniqueId(), player.getLocation());
@@ -564,5 +579,9 @@ public class Main extends JavaPlugin {
 
 	public PluginData getPluginData() {
 		return pluginData;
+	}
+
+	public List<Payout> getPayouts() {
+		return payouts;
 	}
 }

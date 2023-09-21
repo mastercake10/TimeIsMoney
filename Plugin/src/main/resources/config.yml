@@ -19,7 +19,6 @@ afk_use_essentials: true
 display-messages-in-chat: true
 display-messages-in-actionbar: true
 display-messages-in-actionbar-time: 10
-give_money_every_second: 600
 
 # defines whether the money should be stored in the bank (access it using /atm or an [ATM] sign, see more below)
 store-money-in-bank: false
@@ -40,7 +39,18 @@ bank-account: ""
 choose-payout-by-chance: false
 
 # Enable this if you want to add up all lower payouts to the final payout (only relevant when using permissions)
+# doesn't merge payouts with individual intervals. Also doesn't merge when choose-only-one-payout is enabled.
 merge-payouts: false
+
+# Should it choose the last payout a player has permission for from the list? In the payout configuration below,
+# this would mean that VIPs (players with the tim.vip perm) would receive the last payout, while normal players the
+# first in the list. Does not apply for payouts with individual intervals
+choose-only-one-payout: true
+
+# Interval for all payouts; how long should a player need to play on the server to receive one of the payouts?
+# (previously called give_money_every_second)
+# It accepts seconds (s), minutes (m), and hours (h)
+global_interval: "10m"
 
 # You can add as many payouts you want. You only can choose between "permission"
 # and "chance", not both.
@@ -49,7 +59,7 @@ payouts:
     payout_amount: 50
     max_payout_per_day: 1000
     # chance: 10
-    permission:
+    permission: ""
   2:
     payout_amount: 100
     max_payout_per_day: 10000
@@ -60,6 +70,13 @@ payouts:
     # chance: 90
     # You can use any permission name you want. e.g. myserver.donor
     permission: tim.vip
+#  3:
+#    payout_amount: 1000
+#    max_payout_per_day: 10000
+#    # you can define a custom interval for individual payouts
+#    interval: 10h
+#    permission: ""
+
 
 # Translations
 # Both legacy color codes, &c etc. and hex RGB color codes, #&FF00FF, are supported.
