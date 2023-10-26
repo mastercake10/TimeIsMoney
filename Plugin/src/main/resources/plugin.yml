@@ -19,6 +19,12 @@ commands:
     description: Opens the atm
     usage: /<command>
     permission: tim.use
+  payday:
+    description: Opens the atm
+    usage: /<command>
+    permission: tim.payday
+
+folia-supported: true
 
 permissions:
   tim.*:
