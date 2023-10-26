@@ -9,12 +9,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.Linus122.TimeIsMoney.data.*;
 import de.Linus122.TimeIsMoney.tools.Utils;
+import io.papermc.paper.threadedregions.scheduler.EntityScheduler;
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -62,7 +66,7 @@ public class Main extends JavaPlugin {
 	/**
 	 * The list of worlds where the payout feature will be disabled.
 	 */
-	private static List<String> disabledWorlds;
+	public static List<String> disabledWorlds;
 	/**
 	 * The payouts listed in the config.
 	 */
@@ -84,18 +88,21 @@ public class Main extends JavaPlugin {
 	/**
 	 * Main task for keeping track of player's online time
 	 */
-	private BukkitTask playtimeWatcherTask;
-
-	private PluginData pluginData;
+	public PluginData pluginData;
 	
 	/**
 	 * {@inheritDoc}
 	 */
+
+	public static Main plugin;
+
 	@SuppressWarnings({"deprecation"})
 	@Override
 	public void onEnable() {
+		plugin = this;
 
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
+		this.getCommand("payday").setExecutor(new CmdPayDay(this));
 		PL_VERSION = this.getDescription().getVersion();
 		
 		GUIProvider.registerPlugin(this);
@@ -130,13 +137,11 @@ public class Main extends JavaPlugin {
 			// enable debug level
 			getLogger().setLevel(Level.ALL);
 		}
-		
+
 		disabledWorlds = getConfig().getStringList("disabled_in_worlds");
 
 		if (getConfig().getBoolean("enable_atm")) new ATM(this);
 
-		startPlaytimeWatcher();
-		
 		// Placeholder API
 
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -163,52 +168,19 @@ public class Main extends JavaPlugin {
 		if (Bukkit.getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
 			logger.info("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
-		new Metrics(this);
+
+		// This makes folia not load
+//		new Metrics(this);
 		
 		logger.info(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
 	}
-	
-	public void startPlaytimeWatcher() {
-		String intervalString = getConfig().getString("global_interval", getConfig().getInt("give_money_every_second") + "s");
-		int globalTimerSeconds = Utils.parseTimeFormat(intervalString);
 
-		playtimeWatcherTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				if (disabledWorlds.contains(player.getWorld().getName())) continue;
-				PlayerData playerData = this.pluginData.getPlayerData(player);
-
-				for(Payout payout : this.getApplicablePayoutsForPlayer(player)) {
-					PayoutData playerPayoutData = playerData.getPayoutData(payout.id);
-					playerPayoutData.setSecondsSinceLastPayout(playerPayoutData.getSecondsSinceLastPayout() + 1);
-
-					int intervalSeconds = payout.interval != 0 ? payout.interval : globalTimerSeconds;
-
-					if (playerPayoutData.getSecondsSinceLastPayout() >= intervalSeconds) {
-						// new payout triggered, handling the payout
-						pay(player, payout, playerPayoutData);
-
-						if(this.pluginData instanceof MySQLPluginData) {
-							// let other servers know of this payout
-							((MySQLPluginData) this.pluginData).createPendingPayout(player);
-						}
-						playerPayoutData.setSecondsSinceLastPayout(0);
-					}
-				}
-
-
-			}
-		}, 20L, 20L);
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void onDisable() {
-		playtimeWatcherTask.cancel();
-
 		this.pluginData.saveData();
-
 	}
 
 	/**
@@ -277,7 +249,7 @@ public class Main extends JavaPlugin {
 	 * @param player The player to get the payouts of.
 	 * @return A list of payouts
 	 */
-	private List<Payout> getApplicablePayoutsForPlayer(Player player){
+	public List<Payout> getApplicablePayoutsForPlayer(Player player){
 		if (!this.getConfig().getBoolean("choose-payout-by-chance")) {
 			// Choose applicable payouts by permission
 			List<Payout> payouts_ = payouts.stream().filter(payout -> player.hasPermission(payout.permission) || payout.permission.length() == 0).collect(Collectors.toList());
@@ -472,8 +444,12 @@ public class Main extends JavaPlugin {
 	 */
 	private void dispatchCommandSync(final String cmd) {
 		final Server server = this.getServer();
-		
-		this.getServer().getScheduler().runTask(this, () -> server.dispatchCommand(server.getConsoleSender(), cmd));
+
+		GlobalRegionScheduler scheduler = Bukkit.getServer().getGlobalRegionScheduler();
+
+		scheduler.run(Main.plugin, (ScheduledTask) -> {
+			server.dispatchCommand(server.getConsoleSender(), cmd);
+		});
 	}
 	
 	/**
@@ -538,7 +514,16 @@ public class Main extends JavaPlugin {
 			
 			times--;
 			for (int i = 0; i < times; i++) {
-				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message))), 20L * i);
+				EntityScheduler scheduler = player.getScheduler();
+
+				Consumer<ScheduledTask> entityTask = entity -> {
+					sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message)));
+				};
+
+				Runnable endTask = () -> {};
+
+				long delay = (20L * i) + 1;
+				scheduler.runDelayed(Main.plugin, entityTask, endTask, delay);
 			}
 		}
 	}

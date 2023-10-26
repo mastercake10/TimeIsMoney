@@ -233,14 +233,7 @@ public class ATM implements Listener, CommandExecutor {
 		bankAccountsConfig.set(bankString, getBankBalance(offlinePlayer, inWorld) + amount);
 		saveBanks();
 	}
-	
-	/**
-	 * Checks if the player has the specified amount of money in their bank.
-	 *
-	 * @param p The player to check the balance of.
-	 * @param amount The amount of money.
-	 * @return True if the player has the specified amount of money, false otherwise.
-	 */
+
 	private static boolean bankHas(Player player, double amount) {
 		return bankHas(player, player.getWorld(), amount);
 	}
