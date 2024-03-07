@@ -387,7 +387,7 @@ public class ATM implements Listener, CommandExecutor {
 		final Block b = e.getBlock();
 		
 		if (b.getState() instanceof Sign) {
-			Main.scheduler.runDelayed(SchedulerType.SYNC, task -> {
+			Main.scheduler.runDelayed(SchedulerType.SYNC, e.getBlock().getLocation(), task -> {
 				if (b.getState() instanceof Sign) {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[ATM]") 
