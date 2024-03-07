@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import fr.euphyllia.energie.model.SchedulerType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -237,7 +238,7 @@ public class ATM implements Listener, CommandExecutor {
 	/**
 	 * Checks if the player has the specified amount of money in their bank.
 	 *
-	 * @param p The player to check the balance of.
+	 * @param player The player to check the balance of.
 	 * @param amount The amount of money.
 	 * @return True if the player has the specified amount of money, false otherwise.
 	 */
@@ -386,7 +387,7 @@ public class ATM implements Listener, CommandExecutor {
 		final Block b = e.getBlock();
 		
 		if (b.getState() instanceof Sign) {
-			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+			Main.scheduler.runDelayed(SchedulerType.SYNC, e.getBlock().getLocation(), task -> {
 				if (b.getState() instanceof Sign) {
 					Sign sign = (Sign) e.getBlock().getState();
 					if (sign.getLine(0).equalsIgnoreCase("[ATM]") 
