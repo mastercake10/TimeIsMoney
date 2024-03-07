@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 
 import de.Linus122.TimeIsMoney.data.*;
 import de.Linus122.TimeIsMoney.tools.Utils;
+import fr.euphyllia.energie.Energie;
+import fr.euphyllia.energie.model.Scheduler;
+import fr.euphyllia.energie.model.SchedulerType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -47,6 +50,10 @@ public class Main extends JavaPlugin {
 	 * The economy being used by vault.
 	 */
 	static net.milkbowl.vault.economy.Economy economy = null;
+	/**
+	 * The scheduler being used by compatible with folia.
+	 */
+	public static Scheduler scheduler;
 	/**
 	 * The config version number.
 	 */
@@ -95,6 +102,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 
+		scheduler = new Energie(this).getScheduler(Energie.SchedulerSoft.MINECRAFT);
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
 		
@@ -163,7 +171,8 @@ public class Main extends JavaPlugin {
 		if (Bukkit.getPluginManager().isPluginEnabled("Essentials") && this.getConfig().getBoolean("afk_use_essentials")) {
 			logger.info("Time is Money: Essentials found. Hook in it -> Will use Essentials's AFK feature if afk is enabled.");
 		}
-		new Metrics(this);
+		if (!Energie.isFolia())
+			new Metrics(this);
 		
 		logger.info(CC("&aTime is Money &2v" + PL_VERSION + " &astarted."));
 	}
@@ -172,7 +181,7 @@ public class Main extends JavaPlugin {
 		String intervalString = getConfig().getString("global_interval", getConfig().getInt("give_money_every_second") + "s");
 		int globalTimerSeconds = Utils.parseTimeFormat(intervalString);
 
-		playtimeWatcherTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
+		scheduler.runAtFixedRate(SchedulerType.SYNC, task -> {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (disabledWorlds.contains(player.getWorld().getName())) continue;
 				PlayerData playerData = this.pluginData.getPlayerData(player);
@@ -205,7 +214,7 @@ public class Main extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
-		playtimeWatcherTask.cancel();
+		scheduler.cancelAllTask();
 
 		this.pluginData.saveData();
 
@@ -473,7 +482,7 @@ public class Main extends JavaPlugin {
 	private void dispatchCommandSync(final String cmd) {
 		final Server server = this.getServer();
 		
-		this.getServer().getScheduler().runTask(this, () -> server.dispatchCommand(server.getConsoleSender(), cmd));
+		scheduler.runTask(SchedulerType.SYNC, task -> server.dispatchCommand(server.getConsoleSender(), cmd));
 	}
 	
 	/**
@@ -538,7 +547,7 @@ public class Main extends JavaPlugin {
 			
 			times--;
 			for (int i = 0; i < times; i++) {
-				Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message))), 20L * i);
+				scheduler.runDelayed(SchedulerType.SYNC, task -> sendSingleActionbarMessage(player, applyPlaceholders(player, CC(message))), 20L * i);
 			}
 		}
 	}
