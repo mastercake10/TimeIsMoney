@@ -544,13 +544,14 @@ public class Main extends JavaPlugin {
 	}
 	
 	private void sendSingleActionbarMessage(final Player player, final String message) {
-		String packageName = this.getServer().getClass().getPackage().getName();
-        int version = Integer.parseInt(packageName.substring(packageName.lastIndexOf('.') + 1).split("_")[1]);
-        if(version == 8 || version == 9) {
+		String[] minorMajorVersion = Bukkit.getBukkitVersion().split("-")[0].split("\\.");
+
+        int majorVersion = Integer.parseInt(minorMajorVersion[1]);
+        if(majorVersion == 8 || majorVersion == 9) {
         	// 1_8 -> 1_9
         	sendActionbarReflect(player, message);
         	return;
-        } else if (version < 8) {
+        } else if (majorVersion < 8) {
         	// no action bar support
         	return;
         }
