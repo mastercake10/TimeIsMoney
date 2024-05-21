@@ -78,7 +78,7 @@ public class MySQLPluginData extends PluginData{
         playerData.getPayoutDataMap().forEach((payoutID, payoutData) -> {
             try {
                 PreparedStatement preparedStatement = connection
-                        .prepareStatement("REPLACE INTO playerData (uuid, payout_id receivedToday, secondsSinceLastPayout, lastPayoutDate) VALUES (?, ?, ?, ? ,?)");
+                        .prepareStatement("REPLACE INTO payoutData (uuid, payout_id receivedToday, secondsSinceLastPayout, lastPayoutDate) VALUES (?, ?, ?, ? ,?)");
                 preparedStatement.setString(1, uuid.toString());
                 preparedStatement.setInt(1, payoutID);
                 preparedStatement.setDouble(2, payoutData.getReceivedToday());
@@ -114,7 +114,7 @@ public class MySQLPluginData extends PluginData{
         try{
             PlayerData playerData = new PlayerData();
             // get data from DB
-            ResultSet result = connection.prepareStatement("SELECT * FROM playerData WHERE uuid='" + player.getUniqueId() + "'").executeQuery();
+            ResultSet result = connection.prepareStatement("SELECT * FROM payoutData WHERE uuid='" + player.getUniqueId() + "'").executeQuery();
             while(result.next()) {
                 UUID uuid = UUID.fromString(result.getString("uuid"));
                 int payoutID = result.getInt("payout_id");
