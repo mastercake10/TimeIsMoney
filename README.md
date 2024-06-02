@@ -7,7 +7,7 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5ATDE93C6J3WE&source=url)
 
 ## Welcome to the TimeIsMoney GitHub repository!
-TimeIsMoney is a Spigot plugin compatible with Spigot versions 1.7 through 1.18.*, that gives players money for their time online!
+TimeIsMoney is a Spigot plugin compatible with Spigot versions 1.7 through 1.20.6, that gives players money for their time online!
 
 In order for everyone to have the best experience possible, we have a few guidelines that everyone must follow.    
 - For all things on GitHub, please make sure you follow the [code of conduct](CODE_OF_CONDUCT.md).  
