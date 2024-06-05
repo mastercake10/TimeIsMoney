@@ -4,8 +4,12 @@ description: Gives money for online time
 author: Linus122
 website: "https://www.spigotmc.org/resources/time-is-money.12409/"
 main: de.Linus122.TimeIsMoney.Main
+<<<<<<< master
 api-version: 1.13
 folia-supported: true
+=======
+api-version: 1.13.2
+>>>>>>> master
 
 depend: [Vault]
 softdepend: [Essentials, PlaceholderAPI]

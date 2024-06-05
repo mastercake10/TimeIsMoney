@@ -91,8 +91,8 @@ public class ATM implements Listener, CommandExecutor {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		
 		worths = Doubles.toArray(Main.finalconfig.getDoubleList("atm_worth_gradation"));
-		
-		gui = new SpaceGUI().title("§cATM").size(9*3).fillBackground(new SpaceItem().setStack(DecorationMaterial.GRAY_STAINED_GLASS_PANE.get()));
+		gui = new SpaceGUI().title("§cATM").size(9*3);
+		gui.fillBackground(new SpaceItem().setStack(DecorationMaterial.GRAY_STAINED_GLASS_PANE.get()));
 		
 		FileConfiguration fileConfig = new YamlConfiguration();
 	
