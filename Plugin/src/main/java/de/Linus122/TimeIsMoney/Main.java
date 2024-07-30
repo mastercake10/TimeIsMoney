@@ -102,7 +102,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onEnable() {
 
-		scheduler = new Energie(this).getScheduler(Energie.SchedulerSoft.MINECRAFT);
+		scheduler = new Energie(this).getMinecraftScheduler();
 		this.getCommand("timeismoney").setExecutor(new Cmd(this));
 		PL_VERSION = this.getDescription().getVersion();
 		

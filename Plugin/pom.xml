@@ -33,7 +33,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
+				<version>3.5.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -46,12 +46,17 @@
 									<include>de.Linus122.TimeIsMoney:*</include>
 									<include>xyz.spaceio:SpaceGUI</include>
 									<include>xyz.spaceio:Metrics</include>
+									<include>com.github.Euphillya:Energie</include>
 								</includes>
 							</artifactSet>
 							<relocations>
 								<relocation>
 									<pattern>xyz.spaceio</pattern>
 									<shadedPattern>de.Linus122.net.xyz.spaceio</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>fr.euphyllia</pattern>
+									<shadedPattern>de.Linus122.fr.euphyllia</shadedPattern>
 								</relocation>
 							</relocations>
 						</configuration>
@@ -88,7 +93,7 @@
 		<dependency>
 			<groupId>com.github.Euphillya</groupId>
 			<artifactId>Energie</artifactId>
-			<version>5659f25e22</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.ess3</groupId>
