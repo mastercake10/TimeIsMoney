@@ -298,7 +298,9 @@ public class Main extends JavaPlugin {
 
 				// choose the last element of the payouts that does not have a custom timer
 				List<Payout> payoutsWithoutInterval = payouts_.stream().filter(payout -> payout.interval == 0).collect(Collectors.toList());
-				finalPayouts.add(payoutsWithoutInterval.get(payoutsWithoutInterval.size() - 1));
+				if (!payoutsWithoutInterval.isEmpty()) {
+					finalPayouts.add(payoutsWithoutInterval.get(payoutsWithoutInterval.size() - 1));
+				}
 				return finalPayouts;
 			} else if(this.getConfig().getBoolean("merge-payouts")) {
 				// Mering multiple payouts to one
@@ -360,7 +362,9 @@ public class Main extends JavaPlugin {
 		}
 
 		if (!finalconfig.getBoolean("allow-multiple-accounts") && !player.hasPermission("tim.multipleaccountsbypass")) {
-			Set<? extends Player> sameAddressPlayers = Bukkit.getOnlinePlayers().stream().filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString())).collect(Collectors.toSet());
+			Set<? extends Player> sameAddressPlayers = Bukkit.getOnlinePlayers().stream()
+					.filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString()))
+					.collect(Collectors.toSet());
 			int same_address_count = sameAddressPlayers.size();
 
 			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
