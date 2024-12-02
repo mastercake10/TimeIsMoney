@@ -123,6 +123,7 @@ public class MySQLPluginData extends PluginData{
                 playerData.getPayoutDataMap().put(payoutID, payoutData);
                 playerDataMap.put(uuid, playerData);
             }
+            return playerData;
         } catch (SQLException e) {
             e.printStackTrace();
         }
