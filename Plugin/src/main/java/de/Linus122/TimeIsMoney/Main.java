@@ -363,7 +363,7 @@ public class Main extends JavaPlugin {
 
 		if (!finalconfig.getBoolean("allow-multiple-accounts") && !player.hasPermission("tim.multipleaccountsbypass")) {
 			Set<? extends Player> sameAddressPlayers = Bukkit.getOnlinePlayers().stream()
-					.filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString()))
+					.filter(p -> p.getAddress().getHostString().equals(player.getAddress().getHostString()))
 					.collect(Collectors.toSet());
 			int same_address_count = sameAddressPlayers.size();
 
