@@ -112,6 +112,9 @@ public class ATM implements Listener, CommandExecutor {
 			for(int i = 0; i < 4; i++) {
 				gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(mats[i]).setDisplayname(CC("&cDeposit &a%s"))).setLabel("deposit-" + i), 5 + i + 9);
 			}
+			// Add Withdraw All and Deposit All buttons
+			gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(Material.EMERALD).setDisplayname(CC("&cWithdraw All"))).setLabel("withdraw-all"), 2 + 18);
+			gui.getOrCreateItem(new SpaceItem().setStack(new StackBuilder(Material.CHEST).setDisplayname(CC("&cDeposit All"))).setLabel("deposit-all"), 6 + 18);
 		}
 		
 		// balance item
@@ -146,8 +149,26 @@ public class ATM implements Listener, CommandExecutor {
 			})
 			.setFormat((p) -> Main.economy.format(worths[index]));	
 		}
-	
-		
+
+		// Withdraw All button
+		SpaceItem withdrawAllItem = gui.getItemWithLabel("withdraw-all");
+		if(withdrawAllItem != null) {
+			withdrawAllItem.addAction((p, action) -> {
+				ATM.interactWithdrawAll(p);
+				action.getView().update(balanceItem);
+			});
+		}
+
+		// Deposit All button
+		SpaceItem depositAllItem = gui.getItemWithLabel("deposit-all");
+		if(depositAllItem != null) {
+			depositAllItem.addAction((p, action) -> {
+				ATM.interactDepositAll(p);
+				action.getView().update(balanceItem);
+			});
+		}
+
+
 		if(!fileConfig.contains("atm")) {
 			try {
 				fileConfig.set("atm", gui);
@@ -199,8 +220,36 @@ public class ATM implements Listener, CommandExecutor {
 			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
 		}
 	}
-	
-	
+
+	private static void interactWithdrawAll(Player p) {
+		double bankBalance = ATM.getBankBalance(p);
+		if (bankBalance <= 0) {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoneyinbank")));
+			return;
+		}
+		EconomyResponse response = Main.economy.depositPlayer(p, bankBalance);
+		if (response.type == ResponseType.SUCCESS) {
+			ATM.withdrawBank(p, bankBalance);
+			p.sendMessage(String.format(CC(Main.finalconfig.getString("message_atm_withdrew")), Main.economy.format(bankBalance)));
+		}
+	}
+
+	private static void interactDepositAll(Player p) {
+		double playerBalance = Main.economy.getBalance(p);
+		if (playerBalance <= 0) {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_nomoney")));
+			return;
+		}
+		if (ATM.getBankBalance(p) >= Main.finalconfig.getDouble("atm_balance_limit", Double.MAX_VALUE)) {
+			p.sendMessage(CC(Main.finalconfig.getString("message_atm_limit_reached")));
+			return;
+		}
+		ATM.depositBank(p, playerBalance);
+		Main.economy.withdrawPlayer(p, playerBalance);
+		p.sendMessage(String.format(CC(Main.finalconfig.getString("message_atm_deposited")), Main.economy.format(playerBalance)));
+	}
+
+
 	/**
 	 * Withdraws the specified amount of money from the specified player's bank.
 	 *
@@ -445,13 +494,13 @@ public class ATM implements Listener, CommandExecutor {
 							topBal.put(formattedDisplayString, amount);
 						}
 						topBal.entrySet().stream().
-						    sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Main.economy.format(entry.getValue())));
+								sorted(Entry.comparingByValue(Comparator.reverseOrder())).limit(10).forEachOrdered(entry -> cs.sendMessage("§a" + entry.getKey() + "§2: " + Main.economy.format(entry.getValue())));
 						break;
 					case "take":
 						if(args.length > 2) {
 							OfflinePlayer playerToTake = Bukkit.getOfflinePlayer(args[1]);
 							String inWorld = args.length > 3 ? args[3] : "world";
-							
+
 							if(playerToTake == null) {
 								cs.sendMessage("§cThis player does not exists");
 								return true;
@@ -474,10 +523,10 @@ public class ATM implements Listener, CommandExecutor {
 						break;
 					case "give":
 						if(args.length > 2) {
-							
+
 							OfflinePlayer playerToGive = Bukkit.getOfflinePlayer(args[1]);
 							String inWorld = args.length > 3 ? args[3] : "world";
-							
+
 							if(playerToGive == null) {
 								cs.sendMessage("§cThis player does not exists");
 								return true;
