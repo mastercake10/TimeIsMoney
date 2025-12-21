@@ -42,6 +42,11 @@
 			<id>spaceio-repo</id>
 			<url>https://repo.spaceio.xyz/repository/maven-public/</url>
 		</repository>
+		<!-- Override EssentialsX's broken paper-repo with correct URL -->
+		<repository>
+			<id>paper-repo</id>
+			<url>https://repo.papermc.io/repository/maven-public/</url>
+		</repository>
     </repositories>
 
     <build>
